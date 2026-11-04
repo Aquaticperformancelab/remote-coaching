@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Devilrays Remote Coaching</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700;800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: club masthead band → tab bar → one working view at a time (program grid / report form / monitor / roster) */
+:root{
+  --bg:#F3F6FB; --surface:#FFFFFF; --sunk:#E8EEF7; --line:#D3DCEA;
+  --ink:#0A1838; --ink2:#4A5A7A; --navy:#0B1F4D; --royal:#1E5BD8; --cyan:#13A9CF; --red:#D93A3A;
+  --swim:#1E5BD8; --swim-bg:#E3ECFD; --gym:#B4421F; --gym-bg:#FBE9E2; --dry:#7A4CC2; --dry-bg:#EFE7FB; --mob:#15866B; --mob-bg:#DFF4EC;
+  --ok:#1C8A4E; --warn:#B7791F; --bad:#C53030;
+  --onaccent:#FFFFFF;
+  --f-display:"Saira Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#07112A; --surface:#0E1C3D; --sunk:#132550; --line:#24386A;
+  --ink:#E6EDFA; --ink2:#9DB0D6; --navy:#050C20; --royal:#6E9BFF; --cyan:#3FD0F2; --red:#FF6B6B;
+  --swim:#7FA6FF; --swim-bg:#16295A; --gym:#FF9A72; --gym-bg:#3A1F1A; --dry:#C4A2FF; --dry-bg:#2A1F4A; --mob:#5AD6B1; --mob-bg:#123A33;
+  --ok:#4FD18B; --warn:#F2B65A; --bad:#FF7A7A; --onaccent:#06102A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#07112A; --surface:#0E1C3D; --sunk:#132550; --line:#24386A;
+  --ink:#E6EDFA; --ink2:#9DB0D6; --navy:#050C20; --royal:#6E9BFF; --cyan:#3FD0F2; --red:#FF6B6B;
+  --swim:#7FA6FF; --swim-bg:#16295A; --gym:#FF9A72; --gym-bg:#3A1F1A; --dry:#C4A2FF; --dry-bg:#2A1F4A; --mob:#5AD6B1; --mob-bg:#123A33;
+  --ok:#4FD18B; --warn:#F2B65A; --bad:#FF7A7A; --onaccent:#06102A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* masthead */
+.mast{background:var(--navy);color:#fff;padding-block:14px}
+.mast .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mast img{width:56px;height:auto}
+.mast h1{font-size:26px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1}
+.mast .tag{font-family:var(--f-display);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#7FDDF5}
+.mast .who{margin-left:auto;font-size:13px;color:#B9C8EA;text-align:right}
+.mast .who b{color:#fff;font-weight:600}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+.tab{background:none;border:0;padding:12px 14px;font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--cyan)}
+
+main{padding-block:20px 48px}
+.view{display:flex;flex-direction:column;gap:16px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.bar .grow{flex:1}
+.notice{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--ink2)}
+.notice b{color:var(--ink)}
+.notice.err{border-color:var(--bad);color:var(--bad)}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px}
+.btn:hover{border-color:var(--royal)}
+.btn.pri{background:var(--royal);border-color:var(--royal);color:var(--onaccent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 12px;font-weight:600;font-size:14px;color:var(--ink2);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+select,input[type=text],input[type=date],input[type=number],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0;max-width:100%}
+textarea{width:100%;resize:vertical;min-height:120px;font-family:var(--f-body);line-height:1.5}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--ink2)}
+label.f > *{font-weight:400;color:var(--ink);font-size:15px}
+.lbl{font-family:var(--f-display);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2)}
+
+/* kind chips */
+.k{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.k-swim{color:var(--swim);background:var(--swim-bg)}
+.k-gym{color:var(--gym);background:var(--gym-bg)}
+.k-dryland{color:var(--dry);background:var(--dry-bg)}
+.k-mobility{color:var(--mob);background:var(--mob-bg)}
+
+/* week grid */
+.weekhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px}
+.weekhead h2{font-size:24px;font-weight:800;text-transform:uppercase}
+.weekhead .range{color:var(--ink2);font-size:14px}
+.sum{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink2)}
+.sum b{font-family:var(--f-display);font-size:17px;color:var(--ink);margin-right:3px}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:180px;min-width:0}
+.day.today{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+.dh{display:flex;align-items:baseline;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--line)}
+.dh .dn{font-family:var(--f-display);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.06em}
+.dh .dd{font-size:12px;color:var(--ink2)}
+.dbody{display:flex;flex-direction:column;gap:6px;padding:8px;flex:1}
+.addday{margin-top:auto;border:1px dashed var(--line);background:none;border-radius:6px;padding:6px;font-size:13px;color:var(--ink2)}
+.addday:hover{border-color:var(--royal);color:var(--royal)}
+.sess{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--sunk);border:0;border-left:4px solid var(--swim);border-radius:6px;padding:7px 8px;min-width:0}
+.sess.gym{border-left-color:var(--gym)} .sess.dryland{border-left-color:var(--dry)} .sess.mobility{border-left-color:var(--mob)}
+.sess:hover{outline:1px solid var(--royal)}
+.sess .t{font-weight:600;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.sess .m{font-size:12px;color:var(--ink2);display:flex;gap:6px;flex-wrap:wrap}
+.dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--ok)}
+.empty{color:var(--ink2);font-size:13px;padding:6px 2px}
+.day.miss{border-top:3px solid var(--bad)}
+.dh{flex-wrap:wrap;gap:2px 6px}
+.dstat{flex-basis:100%;font-size:11px;font-weight:700;letter-spacing:.02em}
+.dstat.miss{color:var(--bad)} .dstat.done{color:var(--ok)} .dstat.pend{color:var(--warn)}
+.sum .alert b,.sum .alert{color:var(--bad)}
+.strip{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px}
+.dchip{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:46px;padding:5px 4px 0;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-size:11px;color:var(--ink2);overflow:hidden}
+.dchip b{font-family:var(--f-display);font-size:15px;color:var(--ink)}
+.dchip i{font-style:normal;font-weight:700;font-size:10px;min-height:14px}
+.dchip::after{content:"";align-self:stretch;height:4px;margin-top:3px;background:var(--line)}
+.dchip.done::after{background:var(--ok)} .dchip.done i{color:var(--ok)}
+.dchip.miss{border-color:var(--bad)} .dchip.miss::after{background:var(--bad)} .dchip.miss i{color:var(--bad)}
+.dchip.pend::after{background:var(--warn)} .dchip.pend i{color:var(--warn)}
+.dchip[aria-pressed="true"]{box-shadow:0 0 0 2px var(--royal)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.legend span::before{content:"";display:inline-block;width:10px;height:4px;margin-right:5px;vertical-align:middle;background:var(--line)}
+.legend .l-done::before{background:var(--ok)} .legend .l-miss::before{background:var(--bad)} .legend .l-pend::before{background:var(--warn)}
+.wipeprog{font-size:14px;color:var(--ink2)}
+.sess .m .est{color:var(--ink);font-weight:600}
+.estbox{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.esthead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--sunk)}
+.esthead .big{font-family:var(--f-display);font-weight:800;font-size:26px;line-height:1}
+.esthead .sub{font-size:13px;color:var(--ink2)}
+.esthead .diff{font-size:12px;font-weight:700}
+.esthead .diff.warn{color:var(--warn)} .esthead .diff.ok{color:var(--ok)}
+.estbox table{font-size:13px}
+.estbox td{padding:6px 12px}
+.estbox td.how{color:var(--ink2)}
+.estbox tr.miss td{color:var(--ink2);font-style:italic}
+.estbox tr.round td{color:var(--royal)}
+details.help{font-size:13px;color:var(--ink2)}
+details.help summary{cursor:pointer;font-weight:600;color:var(--royal)}
+details.help code{font-size:12px;background:var(--sunk);padding:1px 5px;border-radius:4px;color:var(--ink)}
+details.help ul{margin:6px 0 0;padding-left:18px}
+/* family mode: read-only program, no copy, watermark */
+body.fam .day, body.fam .prog{background-image:var(--wm,none)}
+body.fam .day, body.fam .prog, body.fam .sess, body.fam .estbox{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.code{font-family:var(--f-display);font-weight:800;font-size:18px;letter-spacing:.12em;background:var(--sunk);border:1px dashed var(--line);border-radius:6px;padding:2px 10px;-webkit-user-select:all;user-select:all}
+.links{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}
+.linkchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px}
+.linkchip button{border:0;background:none;color:var(--bad);font-size:12px;font-weight:600;padding:2px 6px}
+.syncstat{font-size:12px;color:#B9C8EA}
+.join{max-width:520px}
+.join .code-in{font-family:var(--f-display);font-size:22px;letter-spacing:.14em;text-transform:uppercase;text-align:center}
+.closed{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ink2);font-size:13px;padding:16px 8px;text-align:center}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.day{min-height:0}.dbody{flex-direction:column}}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h3{font-size:19px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+
+/* report picker */
+.pick{display:flex;flex-direction:column;gap:8px}
+.pickrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);text-align:left;width:100%}
+.pickrow[aria-pressed="true"]{border-color:var(--royal);box-shadow:0 0 0 1px var(--royal)}
+.pickrow .t{font-weight:600;flex:1;min-width:0}
+.pill{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
+.pill.ok{color:var(--ok)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)} .pill.mute{color:var(--ink2)}
+
+.rpe{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+.rpe button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:8px 0;font-family:var(--f-display);font-weight:700;font-size:16px}
+.rpe button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rpecap{font-size:13px;color:var(--ink2);min-height:1.5em}
+.metric{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:10px;align-items:start;border-top:1px solid var(--line);padding-top:10px}
+.metric .ml{font-weight:600;overflow-wrap:anywhere}
+.metric .mt{font-size:12px;color:var(--ink2)}
+.metric .mi{display:flex;flex-direction:column;gap:4px}
+.metric .hint{font-size:12px;color:var(--ink2)}
+@media (max-width:560px){.metric{grid-template-columns:1fr}.rpe{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* monitor */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;text-align:left}
+.acard:hover{border-color:var(--royal)}
+.acard .nm{font-family:var(--f-display);font-weight:800;font-size:19px;text-transform:uppercase;letter-spacing:.03em}
+.acard .grp{font-size:12px;color:var(--ink2)}
+.stats{display:flex;gap:16px}
+.stat .v{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1}
+.stat .l{font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em}
+.flags{display:flex;gap:6px;flex-wrap:wrap}
+svg.bars text{fill:var(--ink2);font-size:10px;font-family:var(--f-body)}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-display);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+td.num,th.num{text-align:right}
+.feed{display:flex;flex-direction:column;gap:8px}
+.fitem{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.fitem .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fitem .top b{font-weight:700}
+.fitem .meta{font-size:13px;color:var(--ink2)}
+.fitem ul{margin:0;padding-left:18px;font-size:14px}
+.fitem .note{font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* roster */
+.roster{display:flex;flex-direction:column}
+.rrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.rrow .nm{font-weight:600;flex:1;min-width:140px}
+.rrow .sub{font-size:13px;color:var(--ink2)}
+
+/* dialog */
+dialog{border:0;border-radius:14px;padding:0;background:var(--surface);color:var(--ink);width:min(680px,calc(100vw - 24px));max-height:calc(100dvh - 24px);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(5,12,32,.55)}
+.dlg{display:flex;flex-direction:column;gap:14px;padding:18px}
+.dlg h3{font-size:21px;font-weight:800;text-transform:uppercase}
+.dlg .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);padding-top:10px;border-top:1px solid var(--line)}
+.dlg .acts .left{margin-right:auto}
+.prog{white-space:pre-wrap;font-size:15px;background:var(--sunk);border-radius:8px;padding:12px;overflow-wrap:anywhere}
+.mrow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:6px}
+.chk{display:flex;flex-wrap:wrap;gap:6px}
+.chk label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:500;color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;font-weight:600;z-index:20}
+@media (prefers-reduced-motion:no-preference){.sess,.btn,.acard{transition:outline-color .15s,border-color .15s}}
+
+/* standalone page base (GitHub Pages) */
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+[hidden]{display:none!important}
+.linkbtn{margin-top:4px;background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:600}
+#lMode{align-self:flex-start}
+#weekSeg{max-width:100%;overflow-x:auto}
+.seg button.now{box-shadow:inset 0 -3px 0 var(--cyan)}
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap">
+    <img src="logo.png" alt="Devilrays Aquatics">
+    <div>
+      <h1>Remote Coaching</h1>
+      <div class="tag">Devilrays Aquatics · Chasing Legacy</div>
+    </div>
+    <div class="who"><div id="who">Memuat…</div><button class="linkbtn" id="logoutBtn" type="button" hidden>Keluar</button></div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Menu">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-v="program" aria-selected="true">Program 4 Minggu</button>
+    <button class="tab" role="tab" data-v="lapor" aria-selected="false">Isi Laporan</button>
+    <button class="tab" role="tab" data-v="pantau" aria-selected="false" id="tabPantau">Pantau</button>
+    <button class="tab" role="tab" data-v="atlet" aria-selected="false" id="tabAtlet">Atlet</button>
+  </div>
+</nav>
+
+<main class="wrap" id="main">
+  <div id="globalNote"></div>
+
+  <!-- LOGIN -->
+  <section class="view" id="v-login" hidden>
+    <form class="panel join" id="lForm">
+      <h3>Masuk ke tracker</h3>
+      <p style="margin:0;color:var(--ink2)">Atlet dan orang tua: buat akun sekali dengan email dan password, lalu masukkan kode atlet dari coach.</p>
+      <div class="seg" id="lMode"><button type="button" data-m="in" aria-pressed="true">Masuk</button><button type="button" data-m="up" aria-pressed="false">Daftar akun baru</button></div>
+      <button type="button" class="btn" id="lGoogle" hidden>Lanjut dengan Google</button>
+      <div id="lOr" class="lbl" hidden>atau dengan email</div>
+      <label class="f">Email<input type="email" id="lEmail" required autocomplete="email"></label>
+      <label class="f">Password (minimal 8 karakter)<input type="password" id="lPass" required minlength="8" autocomplete="current-password"></label>
+      <div class="bar"><span class="grow" id="lMsg" style="font-size:14px;color:var(--bad)"></span><button class="btn pri" type="submit" id="lSubmit">Masuk</button></div>
+    </form>
+  </section>
+
+  <!-- JOIN (family without linked athlete) -->
+  <section class="view" id="v-join" hidden>
+    <form class="panel join" id="jForm">
+      <h3>Hubungkan akun ke atlet</h3>
+      <p style="margin:0;color:var(--ink2)">Masukkan kode atlet yang kamu terima dari coach. Program latihan dan form laporan langsung muncul setelah kode cocok.</p>
+      <label class="f">Kode atlet<input type="text" id="jCode" class="code-in" maxlength="12" autocomplete="off" placeholder="DR-XXXXXX" required></label>
+      <div class="bar"><span class="grow" id="jMsg" style="font-size:14px;color:var(--bad)"></span><button class="btn pri" type="submit" id="jSend">Hubungkan</button></div>
+    </form>
+  </section>
+
+  <!-- PROGRAM -->
+  <section class="view" id="v-program">
+    <div class="bar">
+      <div class="seg" id="weekSeg" aria-label="Pilih minggu"></div>
+      <select id="progAthlete" aria-label="Filter atlet"></select>
+      <span class="grow"></span>
+      <button class="btn sm" id="blockPrev" aria-label="Blok sebelumnya">‹ Blok</button>
+      <button class="btn sm" id="blockNext" aria-label="Blok berikutnya">Blok ›</button>
+      <button class="btn sm coach" id="blockSet">Atur mulai blok</button>
+      <button class="btn sm coach" id="copyWeek">Salin minggu ini</button>
+      <button class="btn sm coach" id="estBtn">Atur estimasi</button>
+      <button class="btn sm danger coach" id="wipeBtn">Hapus data</button>
+      <button class="btn sm" id="addAthBtn" hidden>+ Hubungkan atlet lain</button>
+    </div>
+    <div class="weekhead">
+      <h2 id="weekTitle">Minggu 1</h2>
+      <span class="range" id="weekRange"></span>
+    </div>
+    <div class="sum" id="weekSum"></div>
+    <div class="grid" id="grid"></div>
+    <div id="progEmpty"></div>
+  </section>
+
+  <!-- LAPOR -->
+  <section class="view" id="v-lapor" hidden>
+    <div class="panel">
+      <h3>Laporan latihan harian</h3>
+      <div class="fields">
+        <label class="f">Atlet<select id="rAthlete"></select></label>
+        <label class="f">Tanggal<input type="date" id="rDate"></label>
+        <div class="f"><span class="lbl" style="font-size:13px;letter-spacing:0;text-transform:none;font-family:var(--f-body);font-weight:600">Diisi oleh</span>
+          <div class="seg" id="rRole"><button type="button" data-r="Atlet" aria-pressed="true">Atlet</button><button type="button" data-r="Orang tua" aria-pressed="false">Orang tua</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="bar" style="margin-bottom:8px"><span class="lbl grow">14 hari terakhir</span><span class="legend"><span class="l-done">Lengkap</span><span class="l-miss">Belum lapor</span><span class="l-pend">Hari ini</span><span>Istirahat</span></span></div>
+        <div class="strip" id="rStrip"></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:8px">Sesi di program hari itu</div>
+        <div class="pick" id="rPick"></div>
+      </div>
+    </div>
+    <form class="panel" id="rForm" hidden>
+      <div class="bar"><span id="rKind"></span><h3 id="rTitle" class="grow"></h3></div>
+      <div class="prog" id="rProg"></div>
+      <div class="fields">
+        <label class="f">Status<select id="rStatus"><option value="full">Selesai penuh</option><option value="partial">Selesai sebagian</option><option value="skip">Tidak latihan</option></select></label>
+        <label class="f">Durasi aktual (menit)<input type="number" id="rDur" min="0" max="400" inputmode="numeric"></label>
+        <label class="f">Kondisi badan<select id="rFeel"><option value="">–</option><option value="5">5 · Sangat segar</option><option value="4">4 · Segar</option><option value="3">3 · Biasa</option><option value="2">2 · Lelah</option><option value="1">1 · Sangat lelah / sakit</option></select></label>
+        <label class="f">Tidur semalam (jam)<input type="number" id="rSleep" min="0" max="14" step="0.5" inputmode="decimal"></label>
+      </div>
+      <div>
+        <div class="lbl">RPE sesi · seberapa berat keseluruhan latihan?</div>
+        <div class="rpe" id="rRpe" style="margin-top:8px"></div>
+        <div class="rpecap" id="rRpeCap"></div>
+      </div>
+      <div id="rMetrics"></div>
+      <label class="f">Catatan (rasa, kendala, teknik, cedera)<textarea id="rNote" style="min-height:80px"></textarea></label>
+      <div class="bar"><span class="grow" id="rMsg" style="font-size:14px;color:var(--ink2)"></span><button class="btn pri" type="submit" id="rSave">Kirim laporan</button></div>
+    </form>
+  </section>
+
+  <!-- PANTAU -->
+  <section class="view" id="v-pantau" hidden>
+    <div class="bar">
+      <select id="mAthlete" aria-label="Pilih atlet"></select>
+      <span class="grow"></span>
+      <span style="font-size:13px;color:var(--ink2)">Beban = RPE × durasi (session-RPE, unit AU)</span>
+    </div>
+    <div class="cards" id="mCards"></div>
+    <div id="mDetail" class="view"></div>
+  </section>
+
+  <!-- ATLET -->
+  <section class="view" id="v-atlet" hidden>
+    <form class="panel coach" id="aForm">
+      <h3>Tambah atlet</h3>
+      <div class="fields">
+        <label class="f">Nama<input type="text" id="aName" required maxlength="60"></label>
+        <label class="f">Grup<input type="text" id="aGroup" list="groupList" maxlength="40" placeholder="mis. Senior, Junior"></label>
+        <label class="f">Nomor utama<input type="text" id="aEvents" maxlength="80" placeholder="mis. 50 Free, 100 Fly"></label>
+        <label class="f">Mulai program (Minggu 1)<input type="date" id="aStart"></label>
+        <label class="f">Durasi (minggu)<input type="number" id="aWeeks" min="1" max="104" value="4"></label>
+      </div>
+      <div class="bar"><span class="grow" id="aEnd" style="font-size:13px;color:var(--ink2)"></span><button class="btn pri" type="submit">Simpan atlet</button></div>
+      <datalist id="groupList"></datalist>
+    </form>
+    <div class="panel">
+      <h3>Daftar atlet</h3>
+      <div class="roster" id="roster"></div>
+    </div>
+    
+    <div class="notice">Cara mengajak keluarga: kirim <b>link tracker</b> dan <b>kode atlet</b> di atas lewat WhatsApp. Keluarga mendaftar dengan email dan password, lalu memasukkan kode, dan langsung terhubung. Mereka hanya bisa melihat program atletnya sendiri (mulai 2 hari ke belakang) dan mengisi laporan. Satu akun bisa terhubung ke beberapa atlet (kakak-adik).</div>
+  </section>
+</main>
+
+<dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+<div class="toast" id="toast" hidden></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const KINDS={swim:"Renang",gym:"Gym",dryland:"Dryland",mobility:"Mobility"};
+const ZONES={swim:["EN-1","EN-2","AT","VO2MAX","LP","LT","PL","Speed","Teknik","Recovery"],gym:["Kekuatan","Power","Hipertrofi","Daya tahan otot"],dryland:["Core","Power","Plyometric","Kondisi umum"],mobility:["Bahu","Pinggul","Pergelangan kaki","Tulang belakang","Full body"]};
+const DAYN=["Sen","Sel","Rab","Kam","Jum","Sab","Min"];
+const RPE=["Istirahat","Sangat-sangat ringan","Ringan","Sedang","Agak berat","Berat","Berat","Sangat berat","Sangat berat","Hampir maksimal","Maksimal"];
+const GRACE=2; // sama dengan grace_days() di database
+// ===== Duration estimator (pure) =====
+const EST_DEFAULT={easyPace:110,swimRest:10,sprintRest:45,swimTrans:30,transition:30,
+  cats:{strength:{label:"Kekuatan utama",spr:4,rest:120},unilateral:{label:"Unilateral",spr:3,rest:75},power:{label:"Power / plyo",spr:2,rest:75},core:{label:"Core",spr:3,rest:30},mobility:{label:"Mobility / stretch",spr:3,rest:15},other:{label:"Lainnya",spr:3,rest:60}}};
+const CAT_KW={
+  core:/plank|dead ?bug|hollow|pallof|bird ?dog|crunch|sit[- ]?up|russian|v[- ]?up|bridge|superman|flutter|leg raise|ab |abs|core/,
+  power:/jump|box|slam|throw|bound|hop|plyo|med ?ball|skater|sprint|burpee/,
+  unilateral:/lunge|split|step[- ]?up|single|pistol|bulgarian|cossack/,
+  strength:/squat|deadlift|\brdl\b|bench|press|row|pull[- ]?up|chin[- ]?up|clean|snatch|hip thrust|dip/,
+  mobility:/stretch|mobility|rotation|cat[- ]?cow|dislocate|90\/90|ankle|wall slide|pull[- ]?apart|foam|roll|sleeper|couch|thoracic|hip opener|cars/};
+const TIME_RE="(\\d+\\s*:\\s*\\d{1,2}|:\\d{2}|\\d+\\s*['’]\\s*\\d{1,2}|\\d+(?:[.,]\\d+)?\\s*(?:s\\b|dtk|detik|\"|mnt|menit|min\\b|m\\b|')?)";
+function parseT(t){if(t==null)return null;t=String(t).trim().toLowerCase().replace(",",".");let m;
+  if((m=t.match(/^(\d+)\s*[:'’]\s*(\d{1,2})$/)))return +m[1]*60+ +m[2];
+  if((m=t.match(/^:(\d{2})$/)))return +m[1];
+  if((m=t.match(/^(\d+(?:\.\d+)?)\s*(mnt|menit|min|m|')$/)))return +m[1]*60;
+  if((m=t.match(/^(\d+(?:\.\d+)?)\s*(s|dtk|detik|")$/)))return +m[1];
+  if((m=t.match(/^(\d+(?:\.\d+)?)$/)))return +m[1]<10?+m[1]*60:+m[1];
+  return null}
+const fmtD=s=>{s=Math.round(s);if(s<60)return s+" dtk";const m=Math.round(s/60);if(m<60)return m+" mnt";return Math.floor(m/60)+"j "+(m%60?(m%60)+"m":"")};
+const fmtClock=s=>{s=Math.round(s);const m=Math.floor(s/60),r=s%60;return m+":"+String(r).padStart(2,"0")};
+function restOf(txt){const m=txt.match(new RegExp("(?:\\br\\s*[:.]?|rest|istirahat|ist\\.?)\\s*"+TIME_RE,"i"));return m?parseT(m[1]):null}
+
+function estSwimSeg(seg,cfg){
+  const low=seg.toLowerCase();
+  let rounds=1,inner=seg,outer="",m;
+  if((m=seg.match(/(\d+)\s*[x×]\s*\(([^)]*)\)(.*)$/i))){rounds=+m[1];inner=m[2];outer=m[3]}
+  let reps=1,dist=null;
+  if((m=inner.match(/(\d+)\s*[x×]\s*(\d{2,4})\b/i))&&+m[2]>=25){reps=+m[1];dist=+m[2]}
+  else{const nums=[...inner.replace(/@\s*[\d:'’"]+/g,"").matchAll(/(?<![\d:.\-])(\d{2,4})(?![\d:])/g)].map(x=>+x[1]).filter(n=>n>=25&&n%25===0);if(nums.length)dist=nums[0]}
+  if(!dist)return null;
+  const iv=(m=inner.match(new RegExp("@\\s*"+TIME_RE,"i")))?parseT(m[1]):null;
+  const rr=restOf(inner);const roundRest=restOf(outer)||0;
+  let mult=1,tag="";
+  if(/kick|kaki/.test(low)){mult=1.3;tag="kick"}else if(/drill/.test(low)){mult=1.15;tag="drill"}else if(/pull/.test(low)){mult=1.05;tag="pull"}
+  const sprint=/max|sprint|dive|race|all ?out/.test(low);if(sprint&&!tag){mult=.75;tag="cepat"}
+  let per,how;
+  if(iv){per=iv;how=`${reps}×${dist} @${fmtClock(iv)}`}
+  else{const swim=dist/100*cfg.easyPace*mult;const rest=rr!=null?rr:(reps>1?(sprint?cfg.sprintRest:cfg.swimRest):0);per=swim+rest;
+    how=`${reps>1?reps+"×":""}${dist} m dengan pace ${fmtClock(cfg.easyPace*mult)}/100${tag?" ("+tag+")":""}${rest?" + istirahat "+rest+" dtk":""}`}
+  const total=rounds*reps*per+(rounds-1)*roundRest+(cfg.swimTrans||0);
+  return{sec:total,how:(rounds>1?`${rounds} ronde × (${how})`:how)+(roundRest&&rounds>1?` + ${rounds-1}× istirahat ${fmtClock(roundRest)}`:"")+(cfg.swimTrans?` + transisi ${cfg.swimTrans} dtk`:""),meters:rounds*reps*dist}}
+
+function catOf(line,kind){const l=line.toLowerCase();if(kind==="mobility")return"mobility";
+  for(const k of["core","power","unilateral","strength","mobility"])if(CAT_KW[k].test(l))return k;return"other"}
+function estDryLine(line,kind,cfg){
+  const low=line.toLowerCase();let m;const cat=catOf(line,kind);const c=cfg.cats[cat];const rest=restOf(line)??c.rest;
+  const side=/\/\s*(kaki|sisi|side|leg|tangan|arm|lengan)/.test(low)?2:1;
+  // 1) work/rest interval: 8×20/10, 4×(30s on/30s off)
+  if((m=low.match(/(\d+)\s*[x×]\s*\(?\s*(\d+(?::\d{2})?)\s*(?:s|dtk|detik|")?\s*(?:on|kerja|work)?\s*\/\s*(\d+(?::\d{2})?)\s*(?:s|dtk|detik|")?\s*(?:off|rest|istirahat)?\s*\)?/))&&!/\/\s*(kaki|sisi|side|leg)/.test(low)){
+    const n=+m[1],w=parseT(m[2].includes(":")?m[2]:m[2]+"s"),r=parseT(m[3].includes(":")?m[3]:m[3]+"s");
+    return{sec:n*(w+r)+cfg.transition,how:`${n}×(${w} dtk kerja + ${r} dtk istirahat)`,cat}}
+  // 2) interval/EMOM: 10×5 @1:00
+  if((m=low.match(new RegExp("(\\d+)\\s*[x×][^@]*@\\s*"+TIME_RE)))){const n=+m[1],iv=parseT(m[2]);if(iv)return{sec:n*iv+cfg.transition,how:`${n}× interval ${fmtClock(iv)}`,cat}}
+  // 3) timed sets: 3×45 dtk
+  if((m=low.match(/(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(s\b|dtk|detik|"|mnt|menit|min\b|m\b|')/))){const n=+m[1];const w=parseT(m[2]+m[3])*side;
+    return{sec:n*w+(n-1)*rest+cfg.transition,how:`${n}×${w} dtk kerja + ${n-1}× istirahat ${rest} dtk`,cat}}
+  // 4) sets×reps: 4×6, 4×max
+  if((m=low.match(/(\d+)\s*[x×]\s*(\d+|max)\b/))){const n=+m[1],reps=(m[2]==="max"?8:+m[2])*side;const w=reps*c.spr;
+    return{sec:n*w+(n-1)*rest+cfg.transition,how:`${n} set × ${reps} rep × ${c.spr} dtk + ${n-1}× istirahat ${rest} dtk`,cat}}
+  // 5) reps only: 10× , 8×/sisi
+  if((m=low.match(/(\d+)\s*[x×](?!\s*\d)/))){const reps=+m[1]*side;return{sec:reps*c.spr+cfg.transition,how:`${reps} rep × ${c.spr} dtk`,cat}}
+  // 6) single timed hold: "Plank 45 dtk"
+  if((m=low.match(/(\d+(?:[.,]\d+)?)\s*(s\b|dtk|detik|mnt|menit)/))){const w=parseT(m[1]+m[2])*side;return{sec:w+cfg.transition,how:`${w} dtk`,cat}}
+  return null}
+
+function estimate(s,cfg){
+  cfg=cfg||EST_DEFAULT;const out={total:0,meters:0,lines:[]};const kind=s.kind;
+  let mult=1,multRest=0,multLines=[],inBlock=false;
+  const flush=()=>{if(inBlock&&mult>1&&multLines.length){const sub=multLines.reduce((a,l)=>a+l.sec,0);const extra=sub*(mult-1)+(mult-1)*multRest;out.total+=extra;
+      out.lines.push({text:`↳ ulangi ${mult} ronde`,sec:extra,how:`(${mult-1}× ${fmtD(sub)})${multRest?` + ${mult-1}× istirahat ${fmtClock(multRest)}`:""}`,round:true})}
+    mult=1;multRest=0;multLines=[];inBlock=false};
+  for(const raw of String(s.content||"").split(/\n/)){
+    const line=raw.trim();if(!line){flush();continue}
+    let m;
+    if(kind!=="swim"&&(m=line.match(/^(\d+)\s*(?:ronde|rounds?|sirkuit|circuit|putaran|set\s*:|[x×]\s*:?$|[x×]\s*(?:sirkuit|ronde))/i))){flush();mult=+m[1];multRest=restOf(line)||0;inBlock=true;out.lines.push({text:line,sec:0,how:"penanda ronde",round:true});continue}
+    if(kind==="swim"){
+      const segs=line.split(/\s\+\s|;/);let any=false;
+      for(const sg of segs){const r=estSwimSeg(sg,cfg);if(r){any=true;out.total+=r.sec;out.meters+=r.meters;out.lines.push({text:segs.length>1?sg.trim():line,sec:r.sec,how:r.how})}}
+      if(!any)out.lines.push({text:line,sec:0,how:null});
+    }else{
+      const r=estDryLine(line,kind,cfg);
+      if(r){out.total+=r.sec;const L={text:line,sec:r.sec,how:r.how,cat:r.cat};out.lines.push(L);if(inBlock)multLines.push(L)}else out.lines.push({text:line,sec:0,how:null})}
+  }
+  flush();return out}
+
+const LS={get(k,d){try{const v=localStorage.getItem("drc:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem("drc:"+k,JSON.stringify(v))}catch(e){}}};
+
+// ---------- dates ----------
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return iso(d)};
+const monday=s=>{const d=parse(s);const w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return iso(d)};
+const today=()=>iso(new Date());
+const cutoff=()=>addDays(today(),-GRACE);
+const fmtShort=s=>{const d=parse(s);return d.getDate()+" "+["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"][d.getMonth()]};
+const dayIdx=s=>(parse(s).getDay()+6)%7;
+function parseTime(t){t=t.trim().replace(",",".");if(!t)return null;const m=t.match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);if(!m)return null;return (m[1]?+m[1]*60:0)+ +m[2]}
+function fmtTime(sec){if(sec==null)return"–";const m=Math.floor(sec/60),s=sec-m*60;return m?m+":"+(s<10?"0":"")+s.toFixed(2):s.toFixed(2)}
+function splitTimes(str){return String(str||"").split(/[\s;\/]+|,(?=\s)/).map(x=>x.trim()).filter(Boolean)}
+const clone=o=>JSON.parse(JSON.stringify(o));
+const ts=v=>v?Date.parse(v):0;
+
+// ---------- Supabase ----------
+const CFG_LOADED=!!window.DEVILRAYS_CONFIG;
+const CFG=window.DEVILRAYS_CONFIG||{};
+if(CFG.supabaseUrl)CFG.supabaseUrl=String(CFG.supabaseUrl).trim().replace(/\/(rest|auth)\/v1\/?$/,"").replace(/\/+$/,"");
+let sb=null;
+function keyProblem(k){
+  if(!CFG_LOADED)return"File config.js tidak terbaca. Biasanya ada tanda koma atau tanda kutip yang hilang. Bandingkan dengan contoh di Langkah 4 tutorial.";
+  if(!CFG.supabaseUrl||/XXXX/.test(CFG.supabaseUrl)||!k||/XXXX/.test(k))return"File config.js belum diisi. Ikuti Langkah 4 di tutorial.";
+  if(/^sb_secret_/.test(k))return"config.js berisi SECRET key. Hapus segera dan ganti dengan publishable key (Langkah 4).";
+  try{const p=JSON.parse(atob(k.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));if(p.role==="service_role")return"config.js berisi service_role key. Hapus segera dan ganti dengan anon/publishable key (Langkah 4)."}catch(e){}
+  return null}
+
+// map database rows ↔ app objects
+const fromAth=r=>({id:r.id,name:r.name,group:r.grp||"",events:r.events||"",code:r.code,startDate:r.start_date||null,weeks:r.weeks||4});
+const fromSes=r=>({id:r.id,kind:r.kind,date:r.date,slot:r.slot,focus:r.focus,duration:r.duration,volume:r.volume,title:r.title,content:r.content,metrics:r.metrics||[],athleteIds:r.athlete_ids||[],createdAt:ts(r.created_at),updatedAt:ts(r.updated_at)});
+const toSes=s=>({kind:s.kind,date:s.date,slot:s.slot||"",focus:s.focus||"",duration:s.duration||0,volume:s.volume||0,title:s.title||"",content:s.content||"",metrics:s.metrics||[],athlete_ids:s.athleteIds||[]});
+const fromRep=r=>({id:r.id,sessionId:r.session_id,athleteId:r.athlete_id,date:r.date,kind:r.kind,title:r.title,status:r.status,rpe:r.rpe,duration:r.duration,feel:r.feel,sleep:r.sleep==null?null:Number(r.sleep),note:r.note,results:r.results||[],role:r.role,by:r.by_user,createdAt:ts(r.created_at),updatedAt:ts(r.updated_at)});
+
+async function fetchAll(build){let out=[],from=0;const step=1000;
+  for(;;){const {data,error}=await build().range(from,from+step-1);if(error)throw error;out=out.concat(data);if(data.length<step)break;from+=step}
+  return out}
+
+// ---------- state ----------
+const S={role:"loading",me:null,email:"",
+  athletes:[],sessions:[],reports:[],links:[],
+  blockStart:null,viewOffset:0,week:LS.get("week",0),progAth:LS.get("progAth",""),
+  loaded:false,view:"program",
+  rAth:LS.get("rAth",""),rDate:today(),rRole:LS.get("rRole","Atlet"),rSess:null,rRpe:null,mAth:"",est:clone(EST_DEFAULT)};
+const coach=()=>S.role==="coach";
+const fam=()=>S.role==="family";
+const estOf=s=>estimate(s,S.est);
+const estMin=s=>Math.round(estOf(s).total/60);
+function estBox(e,planned){
+  if(!e.lines.length)return"";
+  const diff=planned&&e.total?Math.round(e.total/60)-planned:null;
+  const rows=e.lines.map(l=>`<tr class="${l.round?"round":l.how?"":"miss"}"><td>${esc(l.text)}</td><td class="how">${l.how?esc(l.how):"tidak terhitung"}</td><td class="num">${l.sec?fmtD(l.sec):"–"}</td></tr>`).join("");
+  return `<div class="estbox"><div class="esthead"><span class="lbl">Estimasi durasi</span><span class="big num">${e.total?fmtD(e.total):"–"}</span>${e.meters?`<span class="sub num">${e.meters.toLocaleString("id-ID")} m terhitung</span>`:""}${diff!=null&&coach()?`<span class="diff ${Math.abs(diff)>planned*.15?"warn":"ok"}">${diff===0?"sama dengan rencana":(diff>0?"+":"")+diff+" mnt vs rencana "+planned+"′"}</span>`:""}</div><div class="tblwrap"><table><tbody>${rows}</tbody></table></div></div>`}
+
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2800)}
+function note(html,err){$("#globalNote").innerHTML=html?`<div class="notice${err?" err":""}">${html}</div>`:""}
+function errMsg(e){const c=e?.code||"",m=e?.message||"";
+  if(c==="42501"||/row-level security/i.test(m))return"Tidak diizinkan. Laporan hanya bisa diisi sampai "+GRACE+" hari setelah latihan.";
+  if(/fetch|network/i.test(m))return"Koneksi terputus. Coba lagi sebentar.";
+  return"Gagal menyimpan: "+(m||c||"error")}
+
+// ---------- tabs ----------
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>show(b.dataset.v));
+function show(v){
+  if(S.role==="anon")v="login";
+  else if(fam()&&!S.athletes.length&&S.loaded)v="join";
+  else if(v==="login"||v==="join")v="program";
+  if(fam()&&v==="atlet")v="program";
+  S.view=v;document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+  ["login","join","program","lapor","pantau","atlet"].forEach(x=>$("#v-"+x).hidden=x!==v);render()}
+
+// ---------- derived ----------
+const athById=id=>S.athletes.find(a=>a.id===id);
+const athName=id=>athById(id)?.name||"Atlet terhapus";
+// periode program per atlet: Minggu 1 dimulai di tanggal mulai atlet
+function period(a){if(!a||!a.startDate)return null;const n=Math.max(1,a.weeks||4);return{start:a.startDate,weeks:n,end:addDays(a.startDate,n*7-1)}}
+const inPeriod=(aid,d)=>{const p=period(athById(aid));return !p||(d>=p.start&&d<=p.end)};
+const assigned=(s,aid)=>(!s.athleteIds||!s.athleteIds.length||s.athleteIds.includes(aid))&&inPeriod(aid,s.date);
+const weekOf=(p,d)=>Math.floor((parse(d)-parse(p.start))/864e5/7);
+function periodStatus(a){const p=period(a);if(!p)return null;const td=today();
+  if(td<p.start)return{p,label:"Mulai "+fmtShort(p.start),cls:"mute"};if(td>p.end)return{p,label:"Selesai "+fmtShort(p.end),cls:"mute"};
+  return{p,label:`Minggu ${weekOf(p,td)+1} dari ${p.weeks}`,cls:"ok"}}
+function repFor(sid,aid){let best=null;for(const r of S.reports)if(r.sessionId===sid&&r.athleteId===aid&&(!best||(r.updatedAt||0)>(best.updatedAt||0)))best=r;return best}
+function blockStart(){const b=S.blockStart||monday(today());return addDays(b,S.viewOffset*28)}
+// frame(): mode atlet (periode atlet terpilih) atau mode kalender (blok 4 minggu dari Senin)
+function frame(){const p=S.progAth?period(athById(S.progAth)):null;
+  if(p)return{mode:"athlete",start:p.start,weeks:p.weeks,end:p.end};
+  return{mode:"block",start:blockStart(),weeks:4,end:addDays(blockStart(),27)}}
+function weekStart(w){return addDays(frame().start,w*7)}
+function focusWeek(){const f=frame();if(f.mode!=="athlete")return;const w=weekOf(f,today());S.week=Math.min(Math.max(w,0),f.weeks-1)}
+const load=r=>r.status==="skip"?0:(Number(r.rpe)||0)*(Number(r.duration)||0);
+function dayStatus(d,aid){
+  const ids=aid?[aid]:S.athletes.map(a=>a.id);const pairs=[];
+  S.sessions.filter(s=>s.date===d).forEach(s=>ids.forEach(x=>{if(assigned(s,x))pairs.push({s,aid:x})}));
+  const missing=pairs.filter(p=>!repFor(p.s.id,p.aid));const td=today();
+  const state=fam()&&d<cutoff()?"closed":!pairs.length?"rest":d>td?"future":!missing.length?"done":d===td?"pend":"miss";
+  return{pairs,missing,state}}
+
+// ---------- PROGRAM ----------
+function renderProgram(){
+  const multi=coach()||S.athletes.length>1;
+  $("#progAthlete").hidden=!multi;
+  if(multi)S.progAth=fillAthSelect($("#progAthlete"),S.progAth,coach()?"Semua atlet":null);else S.progAth=S.athletes[0]?.id||"";
+  if(fam())watermark(athName(S.progAth));
+  const fr=frame();if(S.week>fr.weeks-1)S.week=fr.weeks-1;if(S.week<0)S.week=0;
+  const athMode=fr.mode==="athlete";
+  ["#blockPrev","#blockNext","#blockSet"].forEach(x=>$(x).hidden=athMode||!coach());
+  const seg=$("#weekSeg");seg.innerHTML="";const tdw=athMode?weekOf(fr,today()):-1;
+  for(let w=0;w<fr.weeks;w++){const b=document.createElement("button");b.textContent=(fr.weeks>6?"M":"Minggu ")+(w+1);b.title=fmtShort(addDays(fr.start,w*7))+" – "+fmtShort(addDays(fr.start,w*7+6));if(w===tdw)b.classList.add("now");b.setAttribute("aria-pressed",S.week===w);b.onclick=()=>{S.week=w;LS.set("week",w);renderProgram()};seg.appendChild(b)}
+  if(coach()&&athMode){const b=document.createElement("button");b.textContent="+1 minggu";b.title="Perpanjang program atlet ini";b.onclick=()=>extendAthlete(S.progAth,1);seg.appendChild(b)}
+  const filt=S.progAth;
+  const ws=weekStart(S.week),we=addDays(ws,6);
+  $("#weekTitle").textContent=`Minggu ${S.week+1}`+(athMode?` dari ${fr.weeks}`:"");
+  $("#weekRange").textContent=fmtShort(ws)+" – "+fmtShort(we)+" "+parse(we).getFullYear()+(athMode?` · program ${athName(filt)}: ${fmtShort(fr.start)} – ${fmtShort(fr.end)}`:(S.viewOffset?` · blok ${S.viewOffset>0?"+":""}${S.viewOffset}`:""));
+  const wk=S.sessions.filter(s=>s.date>=ws&&s.date<=we&&(!filt||assigned(s,filt)));
+  const grid=$("#grid");grid.innerHTML="";const td=today();
+  if(fam()&&we<cutoff()){$("#weekSum").innerHTML="";$("#progEmpty").innerHTML=`<div class="notice">Minggu ini sudah selesai dan programnya ditutup. Riwayat laporanmu tetap ada di tab <b>Riwayat</b>.</div>`;return}
+  const vol=wk.filter(s=>s.kind==="swim").reduce((a,s)=>a+(+s.volume||0),0);
+  const cnt=k=>wk.filter(s=>s.kind===k).length;
+  const wkEst=wk.reduce((a,s)=>a+(estOf(s).total||(+s.duration||0)*60),0);
+  const wkMiss=[0,1,2,3,4,5,6].map(i=>dayStatus(addDays(ws,i),filt||null)).filter(x=>x.state==="miss").reduce((a,x)=>a+x.missing.length,0);
+  $("#weekSum").innerHTML=`<span><b class="num">≈${(wkEst/3600).toLocaleString("id-ID",{maximumFractionDigits:1})}</b>jam latihan</span><span><b class="num">${(vol/1000).toLocaleString("id-ID",{maximumFractionDigits:1})}</b>km renang</span><span><b>${cnt("swim")}</b>renang</span><span><b>${cnt("gym")}</b>gym</span><span><b>${cnt("dryland")}</b>dryland</span><span><b>${cnt("mobility")}</b>mobility</span>${wkMiss?`<span class="alert"><b>${wkMiss}</b>laporan belum masuk</span>`:""}`;
+  for(let i=0;i<7;i++){const d=addDays(ws,i);const st=dayStatus(d,filt||null);const col=document.createElement("div");col.className="day"+(d===td?" today":"")+(st.state==="miss"?" miss":"");
+    const lbl=st.state==="miss"?`<span class="dstat miss">● Belum lapor · ${st.missing.length}</span>`:st.state==="pend"?`<span class="dstat pend">● Hari ini · ${st.missing.length} belum</span>`:st.state==="done"?`<span class="dstat done">✓ Lengkap</span>`:"";
+    col.innerHTML=`<div class="dh"><span class="dn">${DAYN[dayIdx(d)]}</span><span class="dd num">${fmtShort(d)}</span>${lbl}</div><div class="dbody"></div>`;
+    const body=col.querySelector(".dbody");
+    if(st.state==="closed"){body.innerHTML=`<div class="closed">Ditutup</div>`;grid.appendChild(col);continue}
+    const list=wk.filter(s=>s.date===d).sort((a,b)=>(a.slot||"").localeCompare(b.slot||"")||(a.createdAt||0)-(b.createdAt||0));
+    if(!list.length)body.insertAdjacentHTML("beforeend",`<div class="empty">Istirahat</div>`);
+    list.forEach(s=>{const b=document.createElement("button");b.className="sess "+s.kind;
+      const targets=filt?[filt]:S.athletes.filter(a=>assigned(s,a.id)).map(a=>a.id);
+      const dots=targets.map(aid=>`<span class="dot${repFor(s.id,aid)?" on":""}" title="${esc(athName(aid))}"></span>`).join("");
+      b.innerHTML=`<span class="k k-${s.kind}">${KINDS[s.kind]}${s.slot?" · "+esc(s.slot):""}</span><span class="t">${esc(s.title||KINDS[s.kind])}</span><span class="m">${s.focus?`<span>${esc(s.focus)}</span>`:""}${s.kind==="swim"&&s.volume?`<span class="num">${(+s.volume).toLocaleString("id-ID")} m</span>`:""}${estMin(s)?`<span class="num est" title="Estimasi dari isi program">≈${estMin(s)}′</span>`:(s.duration?`<span class="num">${s.duration}′</span>`:"")}</span>${targets.length?`<span class="dots">${dots}</span>`:""}`;
+      b.onclick=()=>openSession(s.id);body.appendChild(b)});
+    if(coach()){const a=document.createElement("button");a.className="addday";a.textContent="+ Sesi";a.onclick=()=>openEditor(null,d);body.appendChild(a)}
+    grid.appendChild(col)}
+  const anyBlock=S.sessions.some(s=>s.date>=fr.start&&s.date<=fr.end&&(!filt||assigned(s,filt)));
+  $("#progEmpty").innerHTML=!S.loaded?`<div class="notice">Memuat program…</div>`:
+    (!anyBlock?`<div class="notice">${coach()?`${athMode?"Program "+esc(athName(filt))+" masih kosong.":"Blok 4 minggu ini masih kosong."} Tekan <b>+ Sesi</b> di hari mana pun untuk menulis program. Setelah minggu 1 jadi, pakai <b>Salin minggu ini</b> untuk menyalin ke minggu 2–4. <button class="btn sm" id="sampleBtn" type="button">Isi contoh minggu ini</button>`:"Coach belum menulis program untuk periode ini."}</div>`:"");
+  const sb2=$("#sampleBtn");if(sb2)sb2.onclick=insertSample;
+}
+$("#progAthlete").onchange=e=>{S.progAth=e.target.value;LS.set("progAth",S.progAth);S.week=0;focusWeek();renderProgram()};
+$("#blockPrev").onclick=()=>{S.viewOffset--;renderProgram()};
+$("#blockNext").onclick=()=>{S.viewOffset++;renderProgram()};
+
+function fillAthSelect(sel,val,allLabel){
+  const groups={};S.athletes.forEach(a=>(groups[a.group||"Tanpa grup"]??=[]).push(a));
+  sel.innerHTML=(allLabel?`<option value="">${allLabel}</option>`:(S.athletes.length?"":`<option value="">Belum ada atlet</option>`))+
+    Object.keys(groups).sort().map(g=>`<optgroup label="${esc(g)}">${groups[g].map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</optgroup>`).join("");
+  sel.value=val&&athById(val)?val:(allLabel?"":(S.athletes[0]?.id||""));return sel.value}
+
+function openSession(id){const s=S.sessions.find(x=>x.id===id);if(!s)return;
+  const targets=S.athletes.filter(a=>assigned(s,a.id));
+  const reps=targets.map(a=>({a,r:repFor(s.id,a.id)}));
+  const metrics=(s.metrics||[]).map(m=>`<li><b>${esc(m.label)}</b>${m.target?` · target ${esc(m.target)}`:""}</li>`).join("");
+  const canReport=coach()||s.date>=cutoff();
+  dlgOpen(`<div class="bar"><span class="k k-${s.kind}">${KINDS[s.kind]}${s.slot?" · "+esc(s.slot):""}</span><span class="grow" style="font-size:14px;color:var(--ink2)">${DAYN[dayIdx(s.date)]}, ${fmtShort(s.date)}${s.focus?" · "+esc(s.focus):""}${s.duration?" · "+s.duration+" menit":""}${s.kind==="swim"&&s.volume?" · "+(+s.volume).toLocaleString("id-ID")+" m":""}</span></div>
+  <h3>${esc(s.title||KINDS[s.kind])}</h3>
+  ${s.content?`<div class="prog">${esc(s.content)}</div>`:""}
+  ${estBox(estOf(s),+s.duration||0)}
+  ${metrics?`<div><div class="lbl">Yang dilaporkan</div><ul>${metrics}</ul></div>`:""}
+  <div><div class="lbl" style="margin-bottom:6px">Laporan${coach()?` (${reps.filter(x=>x.r).length}/${reps.length})`:""}</div>
+  <div class="chk">${reps.map(x=>`<span class="pill ${x.r?(x.r.status==="skip"?"bad":"ok"):"mute"}">${esc(x.a.name)}${x.r?(x.r.status==="skip"?" · absen":" · RPE "+(x.r.rpe??"–")):" · belum"}</span>`).join("")||`<span class="empty">Belum ada atlet.</span>`}</div></div>
+  <div class="acts">${coach()?`<button class="btn danger left" id="dDel">Hapus</button><button class="btn" id="dEdit">Edit</button>`:""}<button class="btn" id="dClose">Tutup</button>${canReport?`<button class="btn pri" id="dRep">Isi laporan</button>`:""}</div>`);
+  $("#dClose").onclick=dlgClose;
+  if(canReport)$("#dRep").onclick=()=>{dlgClose();S.rDate=s.date;S.rSess=s.id;if(S.progAth)S.rAth=S.progAth;show("lapor")};
+  if(coach()){$("#dEdit").onclick=()=>openEditor(s);
+    $("#dDel").onclick=async e=>{const b=e.target;if(!b.dataset.c){b.dataset.c=1;b.textContent="Yakin hapus?";return}
+      const {error}=await sb.from("sessions").delete().eq("id",s.id);if(error)return toast(errMsg(error));dlgClose();toast("Sesi dihapus");reload()}}
+}
+
+function openEditor(s,date){
+  const isNew=!s;s=s||{kind:"swim",date,slot:"Sore",metrics:[],athleteIds:S.progAth&&period(athById(S.progAth))?[S.progAth]:[]};
+  dlgOpen(`<h3>${isNew?"Sesi baru":"Edit sesi"}</h3>
+  <div class="fields">
+    <label class="f">Jenis<select id="eKind">${Object.entries(KINDS).map(([k,v])=>`<option value="${k}"${s.kind===k?" selected":""}>${v}</option>`).join("")}</select></label>
+    <label class="f">Tanggal<input type="date" id="eDate" value="${s.date}"></label>
+    <label class="f">Waktu<select id="eSlot">${["Pagi","Siang","Sore","Malam"].map(x=>`<option${s.slot===x?" selected":""}>${x}</option>`).join("")}</select></label>
+    <label class="f">Fokus / zona<input type="text" id="eFocus" list="zoneList" value="${esc(s.focus||"")}" maxlength="40"></label>
+    <label class="f">Durasi rencana (menit)<input type="number" id="eDur" min="0" max="400" value="${s.duration||""}"></label>
+    <label class="f" id="eVolWrap">Volume (meter)<input type="number" id="eVol" min="0" step="50" value="${s.volume||""}"></label>
+  </div>
+  <datalist id="zoneList"></datalist>
+  <label class="f">Judul<input type="text" id="eTitle" value="${esc(s.title||"")}" maxlength="80" placeholder="mis. Aerobic + kick, Lower body strength"></label>
+  <label class="f">Program (set, repetisi, interval, catatan teknik)<textarea id="eContent" placeholder="WU 800 mix&#10;Main 8×100 Free @1:40 EN-2&#10;CD 300">${esc(s.content||"")}</textarea></label>
+  <details class="help"><summary>Cara menulis agar estimasi terhitung</summary><ul>
+    <li><b>Renang:</b> <code>8×100 @1:40</code>, <code>3×(4×200 @3:00) r:1:00</code>, <code>WU 800</code> atau <code>4×25 max</code> tanpa interval dihitung dari pace dasar. Kata <code>kick</code>, <code>drill</code>, <code>pull</code>, <code>max/dive</code> mengubah pace.</li>
+    <li><b>Interval kerja/istirahat:</b> <code>Tabata 8×20/10</code>, <code>4×(30s on/30s off)</code>, EMOM <code>10×5 burpee @1:00</code>.</li>
+    <li><b>Set × repetisi:</b> <code>Back Squat 4×6</code>, <code>Lunge 3×8/kaki</code>, <code>Pull-up 4×max</code>, <code>Cat-cow 10×</code>.</li>
+    <li><b>Durasi:</b> <code>Plank 3×45 dtk</code>, <code>Stretch 2×30 dtk/sisi</code>. Tulis <code>rest 90</code> atau <code>r:1:30</code> untuk mengganti istirahat bawaan.</li>
+    <li><b>Sirkuit:</b> baris <code>3 ronde rest 1:00</code>, lalu gerakan di baris berikutnya, akhiri dengan baris kosong.</li></ul></details>
+  <div id="eEst"></div>
+  <div class="bar"><span class="grow"></span><button type="button" class="btn sm" id="eUseEst">Pakai estimasi sebagai durasi</button></div>
+  <div><div class="lbl" id="eMetLbl"></div><div id="eMets" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div><button type="button" class="btn sm" id="eAddMet" style="margin-top:6px">+ Baris</button></div>
+  <div><div class="lbl">Untuk atlet (kosong = semua)</div><div class="chk" style="margin-top:6px">${S.athletes.map(a=>`<label><input type="checkbox" class="eAth" value="${a.id}"${(s.athleteIds||[]).includes(a.id)?" checked":""}>${esc(a.name)}</label>`).join("")||`<span class="empty">Tambahkan atlet di tab Atlet.</span>`}</div></div>
+  ${isNew?`<div><div class="lbl">Ulangi di hari lain minggu ini (untuk mobility rutin dll.)</div><div class="chk" style="margin-top:6px">${DAYN.map((n,i)=>`<label><input type="checkbox" class="eRep" value="${i}"${i===dayIdx(s.date)?" checked disabled":""}>${n}</label>`).join("")}</div></div>`:""}
+  <div class="acts"><button class="btn" id="eCancel">Batal</button><button class="btn pri" id="eSave">Simpan</button></div>`);
+  const mets=$("#eMets");
+  function metRow(m={}){const r=document.createElement("div");r.className="mrow";r.innerHTML=`<input type="text" class="mL" value="${esc(m.label||"")}" maxlength="80"><input type="text" class="mT" placeholder="target" value="${esc(m.target||"")}" maxlength="40"><button type="button" class="btn sm" aria-label="Hapus baris">×</button>`;r.querySelector("button").onclick=()=>r.remove();mets.appendChild(r);syncPh()}
+  function syncPh(){const k=$("#eKind").value;$("#eVolWrap").hidden=k!=="swim";
+    $("#eMetLbl").textContent=k==="swim"?"Set kunci yang dicatat waktunya":k==="gym"?"Latihan yang dicatat bebannya":"Item yang dilaporkan (opsional, RPE selalu diminta)";
+    mets.querySelectorAll(".mL").forEach(i=>i.placeholder=k==="swim"?"mis. 8×50 Free @1:00":k==="gym"?"mis. Back Squat 4×6":"mis. Plank 3×45 dtk");
+    mets.querySelectorAll(".mT").forEach(i=>i.placeholder=k==="swim"?"target mis. 31.5–32.5":k==="gym"?"target mis. 40 kg":"target");
+    $("#zoneList").innerHTML=(ZONES[k]||[]).map(z=>`<option value="${z}">`).join("")}
+  (s.metrics||[]).forEach(metRow);if(!(s.metrics||[]).length&&(s.kind==="swim"||s.kind==="gym"))metRow();
+  const curEst=()=>estimate({kind:$("#eKind").value,content:$("#eContent").value},S.est);
+  const liveEst=()=>{$("#eEst").innerHTML=estBox(curEst(),+$("#eDur").value||0)};
+  syncPh();$("#eKind").onchange=()=>{syncPh();liveEst()};
+  $("#eContent").oninput=liveEst;$("#eDur").oninput=liveEst;liveEst();
+  $("#eUseEst").onclick=()=>{const e=curEst();if(e.total){$("#eDur").value=Math.round(e.total/60);liveEst();toast("Durasi diisi "+Math.round(e.total/60)+" menit")}else toast("Belum ada baris yang bisa dihitung")};
+  $("#eAddMet").onclick=()=>metRow();$("#eCancel").onclick=dlgClose;
+  $("#eSave").onclick=async()=>{
+    const kind=$("#eKind").value,d=$("#eDate").value;if(!d){toast("Isi tanggal");return}
+    const body={kind,date:d,slot:$("#eSlot").value,focus:$("#eFocus").value.trim(),duration:+$("#eDur").value||0,volume:kind==="swim"?(+$("#eVol").value||0):0,
+      title:$("#eTitle").value.trim(),content:$("#eContent").value,
+      metrics:[...mets.querySelectorAll(".mrow")].map(r=>({label:r.querySelector(".mL").value.trim(),target:r.querySelector(".mT").value.trim()})).filter(m=>m.label),
+      athleteIds:[...document.querySelectorAll(".eAth:checked")].map(x=>x.value)};
+    $("#eSave").disabled=true;let error;
+    if(isNew){const base=dayIdx(d);const rows=[toSes(body)];
+      document.querySelectorAll(".eRep:checked:not(:disabled)").forEach(c=>rows.push(toSes({...body,date:addDays(d,+c.value-base)})));
+      ({error}=await sb.from("sessions").insert(rows))}
+    else({error}=await sb.from("sessions").update(toSes(body)).eq("id",s.id));
+    if(error){$("#eSave").disabled=false;return toast(errMsg(error))}
+    dlgClose();toast("Program tersimpan");reload()
+  };
+}
+
+async function setSetting(key,value){const {error}=await sb.from("settings").upsert({key,value,updated_at:new Date().toISOString()});if(error)throw error}
+$("#blockSet").onclick=()=>{
+  dlgOpen(`<h3>Mulai blok 4 minggu</h3><p style="margin:0;color:var(--ink2)">Pilih hari Senin awal blok. Minggu 1–4 dihitung dari tanggal ini.</p>
+  <label class="f">Tanggal mulai<input type="date" id="bDate" value="${blockStart()}"></label>
+  <div class="acts"><button class="btn" id="bC">Batal</button><button class="btn pri" id="bS">Simpan</button></div>`);
+  $("#bC").onclick=dlgClose;$("#bS").onclick=async()=>{const v=$("#bDate").value;if(!v)return;try{await setSetting("block",{start:monday(v)});S.viewOffset=0;S.week=0;dlgClose();toast("Blok dimulai "+fmtShort(monday(v)));reload()}catch(e){toast(errMsg(e))}};
+};
+$("#copyWeek").onclick=()=>{
+  const ws=weekStart(S.week),we=addDays(ws,6);const src=S.sessions.filter(s=>s.date>=ws&&s.date<=we&&(!S.progAth||assigned(s,S.progAth)));
+  if(!src.length){toast("Minggu ini masih kosong");return}
+  dlgOpen(`<h3>Salin Minggu ${S.week+1}</h3><p style="margin:0;color:var(--ink2)">${src.length} sesi akan disalin ke minggu yang dipilih. Sesi yang sudah ada di sana tetap ada.</p>
+  <div class="chk">${Array.from({length:frame().weeks},(_,i)=>i).filter(w=>w!==S.week).map(w=>`<label><input type="checkbox" class="cw" value="${w}" checked>Minggu ${w+1} (${fmtShort(weekStart(w))})</label>`).join("")}</div>
+  <div class="acts"><button class="btn" id="cC">Batal</button><button class="btn pri" id="cS">Salin</button></div>`);
+  $("#cC").onclick=dlgClose;$("#cS").onclick=async()=>{$("#cS").disabled=true;const rows=[];
+    document.querySelectorAll(".cw:checked").forEach(c=>{const shift=(+c.value-S.week)*7;src.forEach(s=>rows.push(toSes({...s,date:addDays(s.date,shift)})))});
+    const {error}=await sb.from("sessions").insert(rows);if(error){$("#cS").disabled=false;return toast(errMsg(error))}
+    dlgClose();toast(rows.length+" sesi disalin");reload()};
+};
+
+$("#estBtn").onclick=()=>{
+  const e=S.est;
+  dlgOpen(`<h3>Atur estimasi durasi</h3>
+  <p style="margin:0;color:var(--ink2)">Angka ini dipakai untuk menghitung estimasi semua sesi. Sesuaikan dengan level atletmu.</p>
+  <div class="lbl">Renang</div>
+  <div class="fields">
+    <label class="f">Pace dasar /100 m<input type="text" id="sPace" value="${fmtClock(e.easyPace)}" inputmode="decimal"></label>
+    <label class="f">Istirahat antar repetisi (dtk)<input type="number" id="sRest" min="0" value="${e.swimRest}"></label>
+    <label class="f">Istirahat repetisi sprint (dtk)<input type="number" id="sSpr" min="0" value="${e.sprintRest}"></label>
+    <label class="f">Transisi antar set (dtk)<input type="number" id="sTr" min="0" value="${e.swimTrans}"></label>
+  </div>
+  <div class="lbl">Gym, dryland, mobility</div>
+  <label class="f" style="max-width:260px">Transisi antar gerakan (dtk)<input type="number" id="gTr" min="0" value="${e.transition}"></label>
+  <div class="tblwrap"><table><thead><tr><th>Jenis gerakan</th><th class="num">Dtk / repetisi</th><th class="num">Istirahat antar set (dtk)</th></tr></thead><tbody>
+  ${Object.entries(e.cats).map(([k,c])=>`<tr><td>${c.label}</td><td class="num"><input type="number" min="0" step="0.5" id="c-${k}-spr" value="${c.spr}" style="width:80px"></td><td class="num"><input type="number" min="0" id="c-${k}-rest" value="${c.rest}" style="width:90px"></td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="acts"><button class="btn left" id="sReset">Kembalikan bawaan</button><button class="btn" id="sC">Batal</button><button class="btn pri" id="sS">Simpan</button></div>`);
+  $("#sC").onclick=dlgClose;
+  $("#sReset").onclick=async()=>{try{await setSetting("estimate",clone(EST_DEFAULT));dlgClose();toast("Pengaturan bawaan dipakai");reload()}catch(err){toast(errMsg(err))}};
+  $("#sS").onclick=async()=>{const pace=parseT($("#sPace").value);if(!pace){toast("Format pace mis. 1:50");return}
+    const cats={};Object.keys(e.cats).forEach(k=>cats[k]={label:e.cats[k].label,spr:+$(`#c-${k}-spr`).value||0,rest:+$(`#c-${k}-rest`).value||0});
+    try{await setSetting("estimate",{easyPace:pace,swimRest:+$("#sRest").value||0,sprintRest:+$("#sSpr").value||0,swimTrans:+$("#sTr").value||0,transition:+$("#gTr").value||0,cats});dlgClose();toast("Estimasi diperbarui");reload()}catch(err){toast(errMsg(err))}};
+};
+
+// ---------- wipe (coach) ----------
+$("#wipeBtn").onclick=()=>{
+  dlgOpen(`<h3>Hapus data</h3>
+  <p style="margin:0;color:var(--ink2)">Data yang dihapus tidak bisa dikembalikan, dan hilang juga dari halaman keluarga.</p>
+  <div class="chk" style="flex-direction:column;align-items:flex-start">
+    <label><input type="checkbox" id="wRep" checked> Semua laporan latihan (${S.reports.length} dimuat)</label>
+    <label><input type="checkbox" id="wSes" checked> Semua program / sesi latihan (${S.sessions.length} dimuat)</label>
+    <label><input type="checkbox" id="wAth"> Semua atlet, sambungan akun keluarga, dan laporannya (${S.athletes.length})</label>
+    <label><input type="checkbox" id="wBlk"> Tanggal mulai blok</label>
+  </div>
+  <label class="f">Ketik <b style="color:var(--bad)">HAPUS</b> untuk konfirmasi<input type="text" id="wConf" autocomplete="off"></label>
+  <div class="acts"><button class="btn" id="wC">Batal</button><button class="btn danger" id="wGo" disabled>Hapus permanen</button></div>`);
+  const upd=()=>{$("#wGo").disabled=!["#wRep","#wSes","#wAth","#wBlk"].some(s=>$(s).checked)||$("#wConf").value.trim().toUpperCase()!=="HAPUS"};
+  ["#wRep","#wSes","#wAth","#wBlk"].forEach(s=>$(s).onchange=upd);$("#wConf").oninput=upd;
+  $("#wC").onclick=dlgClose;
+  $("#wGo").onclick=async()=>{$("#wGo").disabled=true;const errs=[];
+    const run=async q=>{const {error}=await q;if(error)errs.push(error)};
+    if($("#wRep").checked)await run(sb.from("reports").delete().not("id","is",null));
+    if($("#wSes").checked)await run(sb.from("sessions").delete().not("id","is",null));
+    if($("#wAth").checked)await run(sb.from("athletes").delete().not("id","is",null));
+    if($("#wBlk").checked)await run(sb.from("settings").delete().eq("key","block"));
+    dlgClose();toast(errs.length?errMsg(errs[0]):"Data terhapus");reload()};
+};
+
+async function insertSample(){
+  const ws=weekStart(S.week);
+  const mob={kind:"mobility",slot:"Pagi",focus:"Full body",duration:15,title:"Mobility rutin (contoh)",content:"Cat-cow 10×\nThoracic rotation 8×/sisi\nShoulder dislocate band 15×\nHip 90/90 6×/sisi\nAnkle rocks 10×/sisi",metrics:[]};
+  const list=[
+    {kind:"swim",date:ws,slot:"Sore",focus:"EN-2",duration:105,volume:4800,title:"Aerobic + kick (contoh)",content:"WU 800 mix\nPre 8×50 drill/swim @1:00\nMain 3×(4×200 Free @3:00 EN-2) r:1:00\nKick 8×50 @1:10\nCD 300",metrics:[{label:"4×200 Free ronde 3",target:"2:22–2:26"}]},
+    {kind:"gym",date:addDays(ws,1),slot:"Sore",focus:"Kekuatan",duration:60,title:"Lower body strength (contoh)",content:"Back Squat 4×6\nRDL 3×8\nBulgarian split squat 3×8/kaki\nPallof press 3×10",metrics:[{label:"Back Squat 4×6",target:"RPE 7"},{label:"RDL 3×8",target:""}]},
+    {kind:"swim",date:addDays(ws,2),slot:"Sore",focus:"VO2MAX",duration:100,volume:4200,title:"Speed endurance (contoh)",content:"WU 1000\nMain 16×50 @1:00 best avg\nCD 400",metrics:[{label:"16×50 Free @1:00",target:"rata-rata ≤ 31.5"}]},
+    {kind:"dryland",date:addDays(ws,3),slot:"Sore",focus:"Core",duration:40,title:"Core & plyo (contoh)",content:"Dead bug 3×10\nHollow hold 3×30 dtk\nBox jump 4×5\nMed ball slam 3×8",metrics:[]}];
+  for(let i=0;i<7;i++)list.push({...mob,date:addDays(ws,i)});
+  const ids=frame().mode==="athlete"?[S.progAth]:[];
+  const {error}=await sb.from("sessions").insert(list.map(x=>toSes({...x,athleteIds:ids})));if(error)return toast(errMsg(error));toast("Contoh program dimuat");reload()}
+
+// ---------- LAPOR ----------
+function renderLapor(){
+  S.rAth=fillAthSelect($("#rAthlete"),S.rAth,null);$("#rAthlete").disabled=S.athletes.length<2;
+  if(fam()&&S.rDate<cutoff())S.rDate=today();
+  $("#rDate").value=S.rDate;$("#rDate").min=fam()?cutoff():"";$("#rDate").max=fam()?today():"";
+  document.querySelectorAll("#rRole button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.r===S.rRole));
+  const pick=$("#rPick");
+  if(!S.athletes.length){pick.innerHTML=`<div class="empty">${S.loaded?"Belum ada atlet.":"Memuat…"}</div>`;$("#rForm").hidden=true;$("#rStrip").innerHTML="";return}
+  const strip=$("#rStrip");strip.innerHTML="";const td=today();
+  const from=coach()?-13:-GRACE;
+  for(let i=from;i<=0;i++){const d=addDays(td,i);const st=dayStatus(d,S.rAth);const c=document.createElement("button");c.type="button";
+    c.className="dchip "+st.state;c.setAttribute("aria-pressed",d===S.rDate);
+    c.title=st.state==="miss"?st.missing.map(p=>p.s.title||KINDS[p.s.kind]).join(", "):"";
+    c.innerHTML=`<span>${DAYN[dayIdx(d)]}</span><b class="num">${parse(d).getDate()}</b><i>${st.state==="miss"||st.state==="pend"?st.missing.length+" belum":st.state==="done"?"✓":st.state==="rest"?"–":""}</i>`;
+    c.onclick=()=>{S.rDate=d;S.rSess=null;renderLapor()};strip.appendChild(c)}
+  requestAnimationFrame(()=>{strip.scrollLeft=strip.scrollWidth});
+  const list=S.sessions.filter(s=>s.date===S.rDate&&assigned(s,S.rAth)).sort((a,b)=>(a.slot||"").localeCompare(b.slot||""));
+  if(!list.length){pick.innerHTML=`<div class="empty">Tidak ada sesi terjadwal untuk ${esc(athName(S.rAth))} pada ${fmtShort(S.rDate)}.${fam()?` Laporan bisa diisi sampai ${GRACE} hari setelah latihan.`:" Pilih tanggal lain."}</div>`;$("#rForm").hidden=true;S.rSess=null;return}
+  if(!list.find(s=>s.id===S.rSess))S.rSess=(list.find(s=>!repFor(s.id,S.rAth))||list[0]).id;
+  pick.innerHTML="";list.forEach(s=>{const r=repFor(s.id,S.rAth);const b=document.createElement("button");b.type="button";b.className="pickrow";b.setAttribute("aria-pressed",s.id===S.rSess);
+    b.innerHTML=`<span class="k k-${s.kind}">${KINDS[s.kind]}</span><span class="t">${esc(s.title||KINDS[s.kind])}</span>${r?`<span class="pill ok">Sudah dilaporkan</span>`:`<span class="pill warn">Belum</span>`}`;
+    b.onclick=()=>{S.rSess=s.id;renderLapor()};pick.appendChild(b)});
+  fillForm();
+}
+function fillForm(){
+  const s=S.sessions.find(x=>x.id===S.rSess);if(!s){$("#rForm").hidden=true;return}
+  $("#rForm").hidden=false;const r=repFor(s.id,S.rAth)||{};
+  $("#rKind").innerHTML=`<span class="k k-${s.kind}">${KINDS[s.kind]}</span>`;$("#rTitle").textContent=s.title||KINDS[s.kind];
+  $("#rProg").textContent=s.content||"(tanpa rincian)";$("#rProg").hidden=!s.content;
+  $("#rStatus").value=r.status||"full";$("#rDur").value=r.duration??(s.duration||estMin(s)||"");$("#rFeel").value=r.feel??"";$("#rSleep").value=r.sleep??"";$("#rNote").value=r.note||"";
+  S.rRpe=r.rpe??null;drawRpe();
+  const box=$("#rMetrics");const mets=s.metrics||[];const res=r.results||[];
+  box.innerHTML=mets.length?`<div class="lbl">${s.kind==="swim"?"Catatan waktu":s.kind==="gym"?"Beban yang dipakai":"Hasil"}</div>`:"";
+  mets.forEach((m,i)=>{const prev=res.find(x=>x.label===m.label)||{};const row=document.createElement("div");row.className="metric";
+    const inputs=s.kind==="swim"?`<input type="text" class="mv" data-i="${i}" value="${esc(prev.value||"")}" placeholder="32.4 32.1 31.9 …" inputmode="decimal"><span class="hint">Pisahkan tiap repetisi dengan spasi. Format 32.4 atau 1:05.30</span>`
+      :s.kind==="gym"?`<div style="display:flex;gap:6px"><input type="text" class="mv" data-i="${i}" value="${esc(prev.value||"")}" placeholder="kg, mis. 40" inputmode="decimal" style="flex:1;min-width:0"><input type="text" class="mr" data-i="${i}" value="${esc(prev.reps||"")}" placeholder="set×rep" style="flex:1;min-width:0"></div><span class="hint">Beban kerja tertinggi dan set×rep yang benar-benar dilakukan</span>`
+      :`<input type="text" class="mv" data-i="${i}" value="${esc(prev.value||"")}" placeholder="hasil / keterangan">`;
+    row.innerHTML=`<div><div class="ml">${esc(m.label)}</div>${m.target?`<div class="mt">Target ${esc(m.target)}</div>`:""}</div><div class="mi">${inputs}</div>`;box.appendChild(row)});
+  $("#rMsg").textContent=r.updatedAt?`Terakhir diisi ${new Date(r.updatedAt).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})} oleh ${r.role||"–"}. Kirim lagi untuk memperbarui.`:"";
+  $("#rSave").textContent=r.updatedAt?"Perbarui laporan":"Kirim laporan";
+}
+function drawRpe(){const box=$("#rRpe");box.innerHTML="";for(let i=0;i<=10;i++){const b=document.createElement("button");b.type="button";b.textContent=i;b.setAttribute("aria-pressed",S.rRpe===i);b.onclick=()=>{S.rRpe=i;drawRpe()};box.appendChild(b)}
+  $("#rRpeCap").textContent=S.rRpe==null?"Pilih angka 0–10 sekitar 30 menit setelah latihan.":`${S.rRpe} · ${RPE[S.rRpe]}`}
+$("#rAthlete").onchange=e=>{S.rAth=e.target.value;LS.set("rAth",S.rAth);S.rSess=null;renderLapor()};
+$("#rDate").onchange=e=>{S.rDate=e.target.value||today();S.rSess=null;renderLapor()};
+document.querySelectorAll("#rRole button").forEach(b=>b.onclick=()=>{S.rRole=b.dataset.r;LS.set("rRole",S.rRole);renderLapor()});
+$("#rForm").onsubmit=async e=>{e.preventDefault();
+  const s=S.sessions.find(x=>x.id===S.rSess);if(!s||!S.rAth)return;
+  if(fam()&&s.date<cutoff()){toast("Batas waktu laporan sesi ini sudah lewat");return}
+  const status=$("#rStatus").value;
+  if(status!=="skip"&&S.rRpe==null){toast("Pilih RPE dulu");return}
+  const results=(s.metrics||[]).map((m,i)=>{const v=(document.querySelector(`.mv[data-i="${i}"]`)?.value||"").trim();const reps=(document.querySelector(`.mr[data-i="${i}"]`)?.value||"").trim();
+    const o={label:m.label,value:v};if(reps)o.reps=reps;if(s.kind==="swim"){o.secs=splitTimes(v).map(parseTime).filter(x=>x!=null)}if(s.kind==="gym"){const kg=parseFloat(v.replace(",","."));if(!isNaN(kg))o.kg=kg}return o}).filter(o=>o.value);
+  const row={session_id:s.id,athlete_id:S.rAth,date:s.date,kind:s.kind,title:s.title||"",status,rpe:status==="skip"?null:S.rRpe,duration:status==="skip"?0:(+$("#rDur").value||0),
+    feel:$("#rFeel").value?+$("#rFeel").value:null,sleep:$("#rSleep").value?+$("#rSleep").value:null,note:$("#rNote").value.trim(),results,role:S.rRole,by_user:S.me};
+  $("#rSave").disabled=true;
+  const {error}=await sb.from("reports").upsert(row,{onConflict:"session_id,athlete_id"});
+  $("#rSave").disabled=false;
+  if(error)return toast(errMsg(error));
+  toast("Laporan terkirim. Terima kasih!");reload()
+};
+
+// ---------- PANTAU / RIWAYAT ----------
+function athStats(aid){
+  const p=period(athById(aid));const bs=p?p.start:blockStart();const n=p?p.weeks:4;
+  const wi=p?Math.min(Math.max(weekOf(p,today()),0),n-1):0;const first=Math.max(0,Math.min(n-12,wi-6));
+  const weeks=Array.from({length:Math.min(n,12)},(_,k)=>first+k).map(w=>{const ws=addDays(bs,w*7),we=addDays(ws,6);
+    const reps=S.reports.filter(r=>r.athleteId===aid&&r.date>=ws&&r.date<=we);
+    const plan=S.sessions.filter(s=>s.date>=ws&&s.date<=we&&assigned(s,aid)&&s.date<=today());
+    return{w,ws,we,load:reps.reduce((a,r)=>a+load(r),0),done:reps.filter(r=>r.status!=="skip").length,plan:plan.length,reps}});
+  const td0=today();const tw=weeks.find(w=>td0>=w.ws&&td0<=w.we);
+  const pastAll=S.sessions.filter(s=>assigned(s,aid)&&s.date<today()&&s.date>=addDays(today(),-7));
+  const missing=pastAll.filter(s=>!repFor(s.id,aid)).length;
+  const recent=S.reports.filter(r=>r.athleteId===aid).sort((a,b)=>b.date.localeCompare(a.date)||((b.updatedAt||0)-(a.updatedAt||0)));
+  const last=recent[0];
+  const feelLow=recent.slice(0,3).filter(r=>r.feel&&r.feel<=2).length>=2;
+  const pain=recent.slice(0,3).some(r=>/sakit|nyeri|cedera|cidera|pain/i.test(r.note||""));
+  let spike=null;const ci=weeks.findIndex(w=>w===tw);if(ci>0){const prev=weeks.slice(0,ci).map(w=>w.load).filter(x=>x>0);if(prev.length){const m=prev.reduce((a,b)=>a+b,0)/prev.length;if(m>0)spike=weeks[ci].load/m}}
+  return{weeks,tw,missing,last,feelLow,pain,spike}}
+function bars(weeks){const W=220,H=64,n=weeks.length,max=Math.max(1,...weeks.map(w=>w.load));const gap=n>4?6:(W-160)/3,bw=(W-gap*(n-1))/n;const td0=today();const ci=weeks.findIndex(w=>td0>=w.ws&&td0<=w.we);
+  return `<svg class="bars" viewBox="0 0 ${W} ${H+16}" width="100%" height="80" role="img" aria-label="Beban per minggu">${weeks.map((w,i)=>{const h=Math.max(w.load?3:1,(w.load/max)*H);const x=i*(bw+gap);
+    return `<rect x="${x}" y="${H-h}" width="${bw}" height="${h}" rx="3" fill="${i===ci?"var(--cyan)":"var(--royal)"}" opacity="${i===ci?1:.55}"><title>Minggu ${w.w+1}: ${Math.round(w.load)} AU</title></rect><text x="${x+bw/2}" y="${H+12}" text-anchor="middle">${n>6?"":"M"}${w.w+1}${w.load&&n<=4?" · "+Math.round(w.load):""}</text>`}).join("")}</svg>`}
+function renderPantau(){
+  const sel=$("#mAthlete");const multi=coach()||S.athletes.length>1;sel.hidden=!multi;
+  if(multi)S.mAth=fillAthSelect(sel,S.mAth,coach()?"Semua atlet":null);else S.mAth=S.athletes[0]?.id||"";
+  const cards=$("#mCards");
+  if(!S.athletes.length){cards.innerHTML=`<div class="notice">${S.loaded?"Belum ada atlet. Tambahkan di tab Atlet.":"Memuat…"}</div>`;$("#mDetail").innerHTML="";return}
+  const list=S.mAth?[athById(S.mAth)].filter(Boolean):S.athletes;
+  cards.innerHTML="";list.forEach(a=>{const st=athStats(a.id);const tw=st.tw||{done:0,plan:0,load:0,reps:[]};
+    const comp=tw.plan?Math.round(tw.done/tw.plan*100):null;
+    const flags=[];
+    if(coach()){if(st.missing>=2)flags.push(`<span class="pill warn">${st.missing} sesi belum dilaporkan</span>`);
+      if(st.spike&&st.spike>1.3)flags.push(`<span class="pill bad">Beban naik ${Math.round((st.spike-1)*100)}%</span>`);
+      if(st.feelLow)flags.push(`<span class="pill bad">Sering lelah</span>`);if(st.pain)flags.push(`<span class="pill bad">Keluhan nyeri</span>`);
+      if(!flags.length&&st.last)flags.push(`<span class="pill ok">Aman</span>`)}
+    const c=document.createElement("button");c.className="acard";c.type="button";
+    const ps=periodStatus(a);
+    c.innerHTML=`<div><div class="nm">${esc(a.name)}</div><div class="grp">${esc(a.group||"")}${a.events?" · "+esc(a.events):""}${ps?` · <span class="pill ${ps.cls}">${ps.label}</span>`:""}</div></div>
+      <div class="stats">${coach()?`<div class="stat"><div class="v num">${comp==null?"–":comp+"%"}</div><div class="l">Kepatuhan mgg ini</div></div>`:`<div class="stat"><div class="v num">${tw.reps.length}</div><div class="l">Laporan mgg ini</div></div>`}<div class="stat"><div class="v num">${Math.round(tw.load)}</div><div class="l">Beban AU</div></div><div class="stat"><div class="v num" style="font-size:15px">${st.last?fmtShort(st.last.date):"–"}</div><div class="l">Laporan terakhir</div></div></div>
+      ${bars(st.weeks)}${flags.length?`<div class="flags">${flags.join("")}</div>`:""}`;
+    c.onclick=()=>{S.mAth=a.id;renderPantau()};cards.appendChild(c)});
+  renderDetail();
+}
+$("#mAthlete").onchange=e=>{S.mAth=e.target.value;renderPantau()};
+function renderDetail(){
+  const box=$("#mDetail");const aid=S.mAth;
+  const reps=S.reports.filter(r=>!aid||r.athleteId===aid).sort((a,b)=>b.date.localeCompare(a.date)||((b.updatedAt||0)-(a.updatedAt||0))).slice(0,aid?60:30);
+  let hist="";
+  if(aid){
+    const by={};S.reports.filter(r=>r.athleteId===aid&&r.kind==="swim").forEach(r=>(r.results||[]).forEach(x=>{if(x.secs&&x.secs.length)(by[x.label]??=[]).push({date:r.date,secs:x.secs})}));
+    const rows=Object.entries(by).map(([l,arr])=>{arr.sort((a,b)=>a.date.localeCompare(b.date));return arr.map(e=>{const best=Math.min(...e.secs),avg=e.secs.reduce((a,b)=>a+b,0)/e.secs.length;return`<tr><td>${esc(l)}</td><td class="num">${fmtShort(e.date)}</td><td class="num">${e.secs.length}</td><td class="num">${fmtTime(best)}</td><td class="num">${fmtTime(avg)}</td><td class="num">${fmtTime(Math.max(...e.secs))}</td></tr>`}).join("")}).join("");
+    const gby={};S.reports.filter(r=>r.athleteId===aid&&r.kind==="gym").forEach(r=>(r.results||[]).forEach(x=>{if(x.value)(gby[x.label]??=[]).push({date:r.date,v:x.value,reps:x.reps})}));
+    const grows=Object.entries(gby).map(([l,arr])=>arr.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<tr><td>${esc(l)}</td><td class="num">${fmtShort(e.date)}</td><td class="num">${esc(e.v)}</td><td>${esc(e.reps||"")}</td></tr>`).join("")).join("");
+    hist=`<div class="two"><div class="panel"><h3>Riwayat catatan waktu</h3>${rows?`<div class="tblwrap"><table><thead><tr><th>Set</th><th class="num">Tgl</th><th class="num">Rep</th><th class="num">Terbaik</th><th class="num">Rata²</th><th class="num">Terlambat</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">Belum ada catatan waktu.</div>`}</div>
+      <div class="panel"><h3>Riwayat beban gym</h3>${grows?`<div class="tblwrap"><table><thead><tr><th>Latihan</th><th class="num">Tgl</th><th class="num">Beban</th><th>Set×rep</th></tr></thead><tbody>${grows}</tbody></table></div>`:`<div class="empty">Belum ada data beban.</div>`}</div></div>`}
+  let missHtml="";
+  if(coach()){const td=today();const missRows=[];
+    for(let i=1;i<=14;i++){const d=addDays(td,-i);const st=dayStatus(d,aid||null);st.missing.forEach(p=>missRows.push({d,...p}))}
+    missHtml=`<div class="panel"><h3>Belum dilaporkan · 14 hari terakhir</h3>${missRows.length?`<div class="tblwrap"><table><thead><tr><th>Tanggal</th>${aid?"":"<th>Atlet</th>"}<th>Sesi</th></tr></thead><tbody>${missRows.map(m=>`<tr><td class="num">${DAYN[dayIdx(m.d)]}, ${fmtShort(m.d)}</td>${aid?"":`<td>${esc(athName(m.aid))}</td>`}<td><span class="k k-${m.s.kind}">${KINDS[m.s.kind]}</span> ${esc(m.s.title||"")}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty">Semua sesi sudah dilaporkan.</div>`}</div>`}
+  box.innerHTML=`${missHtml}${hist}<div class="panel"><div class="bar"><h3 class="grow">Laporan terbaru${aid&&coach()?" · "+esc(athName(aid)):""}</h3>${aid&&coach()?`<button class="btn sm" id="mAll">Lihat semua atlet</button>`:""}</div>
+   <div class="feed">${reps.map(r=>{const st=r.status==="skip"?`<span class="pill bad">Tidak latihan</span>`:r.status==="partial"?`<span class="pill warn">Sebagian</span>`:`<span class="pill ok">Selesai</span>`;
+    const res=(r.results||[]).map(x=>`<li><b>${esc(x.label)}:</b> ${esc(x.value)}${x.reps?" · "+esc(x.reps):""}${x.secs&&x.secs.length?` <span class="num" style="color:var(--ink2)">(terbaik ${fmtTime(Math.min(...x.secs))})</span>`:""}</li>`).join("");
+    return `<div class="fitem"><div class="top"><span class="k k-${r.kind}">${KINDS[r.kind]||r.kind}</span><b>${esc(athName(r.athleteId))}</b><span>${esc(r.title||"")}</span>${st}</div>
+      <div class="meta num">${DAYN[dayIdx(r.date)]} ${fmtShort(r.date)} · ${r.rpe!=null?"RPE "+r.rpe+" · ":""}${r.duration?r.duration+" mnt · beban "+Math.round(load(r))+" AU · ":""}${r.feel?"kondisi "+r.feel+"/5 · ":""}${r.sleep?"tidur "+r.sleep+" j · ":""}diisi ${esc(r.role||"")}</div>
+      ${res?`<ul>${res}</ul>`:""}${r.note?`<div class="note">${esc(r.note)}</div>`:""}</div>`}).join("")||`<div class="empty">${S.loaded?"Belum ada laporan.":"Memuat…"}</div>`}</div></div>`;
+  const ma=$("#mAll");if(ma)ma.onclick=()=>{S.mAth="";renderPantau()};
+}
+
+// ---------- ATLET (coach) ----------
+const CODE_CH="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const newCode=()=>"DR-"+Array.from({length:6},()=>CODE_CH[Math.floor(Math.random()*CODE_CH.length)]).join("");
+async function copyText(t,el){try{await navigator.clipboard.writeText(t);toast("Kode disalin")}catch(e){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Tekan salin untuk menyalin kode")}}
+function renderAtlet(){
+  $("#groupList").innerHTML=[...new Set(S.athletes.map(a=>a.group).filter(Boolean))].map(g=>`<option value="${esc(g)}">`).join("");
+  const r=$("#roster");
+  if(!S.athletes.length){r.innerHTML=`<div class="empty">${S.loaded?"Belum ada atlet. Tambahkan lewat form di atas.":"Memuat…"}</div>`;return}
+  r.innerHTML="";S.athletes.forEach(a=>{const row=document.createElement("div");row.className="rrow";
+    const n=S.reports.filter(x=>x.athleteId===a.id).length;const lv=S.links.filter(l=>l.athleteId===a.id);
+    const ps=periodStatus(a);
+    row.innerHTML=`<div class="nm">${esc(a.name)}<div class="sub">${esc(a.group||"Tanpa grup")}${a.events?" · "+esc(a.events):""} · ${n} laporan</div><div class="sub">${ps?`Program ${fmtShort(ps.p.start)} – ${fmtShort(ps.p.end)} ${parse(ps.p.end).getFullYear()} (${ps.p.weeks} minggu) · <span class="pill ${ps.cls}">${ps.label}</span>`:`<span class="pill warn">Periode program belum diatur</span>`}</div></div>
+      <span class="code" data-code>${esc(a.code)}</span><button class="btn sm" data-copy>Salin kode</button>
+      <button class="btn sm" data-e>Edit</button><button class="btn sm danger" data-d>Hapus</button>
+      <div class="links">${lv.length?lv.map(l=>`<span class="linkchip">${esc(l.email||"akun tanpa email")}<button data-un="${esc(l.userId)}">Lepas</button></span>`).join(""):`<span class="sub">Belum ada akun keluarga terhubung</span>`}</div>`;
+    row.querySelector("[data-copy]").onclick=()=>copyText(a.code,row.querySelector("[data-code]"));
+    row.querySelector("[data-e]").onclick=()=>editAth(a);
+    row.querySelector("[data-d]").onclick=async e=>{const b=e.target;if(!b.dataset.c){b.dataset.c=1;b.textContent="Yakin? Laporannya ikut terhapus";return}
+      const {error}=await sb.from("athletes").delete().eq("id",a.id);if(error)return toast(errMsg(error));toast("Atlet dihapus");reload()};
+    row.querySelectorAll("[data-un]").forEach(b=>b.onclick=async()=>{if(!b.dataset.c){b.dataset.c=1;b.textContent="Yakin lepas?";return}
+      const {error}=await sb.from("family_links").delete().eq("user_id",b.dataset.un).eq("athlete_id",a.id);if(error)return toast(errMsg(error));toast("Akun dilepas");reload()});
+    r.appendChild(row)});
+}
+$("#aForm").onsubmit=async e=>{e.preventDefault();const name=$("#aName").value.trim();if(!name)return;
+  const {error}=await sb.from("athletes").insert({name,grp:$("#aGroup").value.trim(),events:$("#aEvents").value.trim(),code:newCode(),start_date:$("#aStart").value||null,weeks:Math.max(1,+$("#aWeeks").value||4)});
+  if(error)return toast(errMsg(error));$("#aForm").reset();aEnd();toast(name+" ditambahkan");reload()};
+const endText=(st,w)=>st?`Selesai ${fmtShort(addDays(st,Math.max(1,+w||4)*7-1))} ${parse(addDays(st,Math.max(1,+w||4)*7-1)).getFullYear()}`:"Isi tanggal mulai";
+function aEnd(){$("#aEnd").textContent=endText($("#aStart").value,$("#aWeeks").value)}
+$("#aStart").oninput=aEnd;$("#aWeeks").oninput=aEnd;aEnd();
+async function extendAthlete(aid,n){const a=athById(aid);if(!a)return;const w=(a.weeks||4)+n;
+  const {error}=await sb.from("athletes").update({weeks:w}).eq("id",aid);if(error)return toast(errMsg(error));toast(`Program ${a.name} jadi ${w} minggu, selesai ${fmtShort(addDays(a.startDate,w*7-1))}`);reload()}
+function editAth(a){dlgOpen(`<h3>Edit atlet</h3><div class="fields"><label class="f">Nama<input type="text" id="xN" value="${esc(a.name)}" maxlength="60"></label><label class="f">Grup<input type="text" id="xG" value="${esc(a.group||"")}" maxlength="40"></label><label class="f">Nomor utama<input type="text" id="xE" value="${esc(a.events||"")}" maxlength="80"></label>
+    <label class="f">Mulai program (Minggu 1)<input type="date" id="xS1" value="${a.startDate||""}"></label>
+    <label class="f">Durasi (minggu)<input type="number" id="xW" min="1" max="104" value="${a.weeks||4}"></label></div>
+  <div style="font-size:13px;color:var(--ink2)" id="xEnd"></div>
+  <div class="bar"><span style="font-size:13px;color:var(--ink2)">Kode: <b>${esc(a.code)}</b></span><span class="grow"></span><button class="btn sm" id="xR">Buat kode baru</button></div>
+  <div class="acts"><button class="btn" id="xC">Batal</button><button class="btn pri" id="xS">Simpan</button></div>`);
+  const xe=()=>$("#xEnd").textContent=endText($("#xS1").value,$("#xW").value);$("#xS1").oninput=xe;$("#xW").oninput=xe;xe();
+  $("#xC").onclick=dlgClose;
+  $("#xR").onclick=async()=>{const {error}=await sb.from("athletes").update({code:newCode()}).eq("id",a.id);if(error)return toast(errMsg(error));dlgClose();toast("Kode baru dibuat. Akun yang sudah terhubung tetap terhubung.");reload()};
+  $("#xS").onclick=async()=>{const {error}=await sb.from("athletes").update({name:$("#xN").value.trim()||a.name,grp:$("#xG").value.trim(),events:$("#xE").value.trim(),start_date:$("#xS1").value||null,weeks:Math.max(1,+$("#xW").value||4)}).eq("id",a.id);if(error)return toast(errMsg(error));dlgClose();toast("Tersimpan");reload()}}
+
+// ---------- LOGIN & JOIN ----------
+let authMode="in";
+function renderLogin(){
+  document.querySelectorAll("#lMode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===authMode));
+  $("#lSubmit").textContent=authMode==="in"?"Masuk":"Buat akun";
+  $("#lPass").autocomplete=authMode==="in"?"current-password":"new-password";
+  $("#lGoogle").hidden=!CFG.googleLogin;$("#lOr").hidden=!CFG.googleLogin;
+}
+document.querySelectorAll("#lMode button").forEach(b=>b.onclick=()=>{authMode=b.dataset.m;$("#lMsg").textContent="";renderLogin()});
+$("#lForm").onsubmit=async e=>{e.preventDefault();const email=$("#lEmail").value.trim(),password=$("#lPass").value;
+  if(password.length<8){$("#lMsg").textContent="Password minimal 8 karakter.";return}
+  $("#lSubmit").disabled=true;$("#lMsg").textContent="";
+  const {data,error}=authMode==="in"?await sb.auth.signInWithPassword({email,password}):await sb.auth.signUp({email,password});
+  $("#lSubmit").disabled=false;
+  if(error){$("#lMsg").textContent=/invalid login/i.test(error.message)?"Email atau password salah.":/already registered/i.test(error.message)?"Email ini sudah terdaftar. Pilih Masuk.":error.message;return}
+  if(authMode==="up"&&!data.session){$("#lMsg").textContent="Akun dibuat, tapi Supabase meminta konfirmasi email. Matikan 'Confirm email' (Langkah 3 tutorial).";return}
+};
+$("#lGoogle").onclick=async()=>{const {error}=await sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname}});if(error)toast(error.message)};
+$("#logoutBtn").onclick=async()=>{await sb.auth.signOut();location.hash="";location.reload()};
+
+async function claim(code,msgEl){
+  const {data,error}=await sb.rpc("claim_athlete",{p_code:code});
+  if(error){msgEl.textContent=error.message;return false}
+  if(data?.error){msgEl.textContent=data.error;return false}
+  toast("Terhubung ke "+data.name);LS.set("progAth",data.id);S.progAth=S.rAth=data.id;await reload();return true}
+$("#jForm").onsubmit=async e=>{e.preventDefault();const code=$("#jCode").value;$("#jSend").disabled=true;
+  if(await claim(code,$("#jMsg")))show("program");$("#jSend").disabled=false};
+$("#addAthBtn").onclick=()=>{
+  dlgOpen(`<h3>Hubungkan atlet lain</h3><p style="margin:0;color:var(--ink2)">Untuk kakak/adik yang juga berlatih di Devilrays. Masukkan kode atlet dari coach.</p>
+  <label class="f">Kode atlet<input type="text" id="xCode" class="code-in" maxlength="12" autocomplete="off" placeholder="DR-XXXXXX"></label><div id="xMsg" style="font-size:14px;color:var(--bad)"></div>
+  <div class="acts"><button class="btn" id="xCc">Batal</button><button class="btn pri" id="xGo">Hubungkan</button></div>`);
+  $("#xCc").onclick=dlgClose;$("#xGo").onclick=async()=>{if(await claim($("#xCode").value,$("#xMsg")))dlgClose()}};
+
+// ---------- dialog / anti-copy / render ----------
+function dlgOpen(html){$("#dlgBody").innerHTML=html;const d=$("#dlg");if(!d.open)d.showModal()}
+function dlgClose(){$("#dlg").close()}
+$("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")dlgClose()});
+const inProg=n=>{const el=n&&(n.nodeType===1?n:n.parentElement);return !!el?.closest?.("#grid,.prog,.estbox,.sess,#dlg")};
+["copy","cut"].forEach(t=>document.addEventListener(t,e=>{if(fam()&&inProg(getSelection()?.anchorNode)){e.preventDefault();toast("Program hanya untuk dibaca")}}));
+document.addEventListener("contextmenu",e=>{if(fam()&&inProg(e.target))e.preventDefault()});
+let wmName="";
+function watermark(name){if(name===wmName)return;wmName=name;const t=esc(name+" · Devilrays Aquatics");
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="280" height="150"><text x="10" y="90" transform="rotate(-18 140 75)" fill="#7f8aa3" fill-opacity="0.13" font-size="15" font-family="sans-serif" font-weight="600">${t}</text></svg>`;
+  document.body.style.setProperty("--wm",`url("data:image/svg+xml,${encodeURIComponent(svg)}")`)}
+
+function render(){
+  const signed=coach()||fam();
+  $("#tabAtlet").hidden=!coach();$("#tabPantau").textContent=coach()?"Pantau":"Riwayat";
+  document.querySelector(".tabs").hidden=!signed||(fam()&&!S.athletes.length);
+  document.querySelectorAll(".coach").forEach(el=>el.hidden=!coach());
+  $("#addAthBtn").hidden=!(fam()&&S.athletes.length);
+  $("#logoutBtn").hidden=!signed;
+  if(S.view==="login")renderLogin();else if(S.view==="join")$("#jMsg").textContent=$("#jMsg").textContent||"";
+  else if(S.view==="program")renderProgram();else if(S.view==="lapor")renderLapor();else if(S.view==="pantau")renderPantau();else if(S.view==="atlet")renderAtlet();
+}
+function refresh(){if(S.view!=="lapor")return render();const f=$("#rForm");if(f.hidden||!f.contains(document.activeElement))renderLapor()}
+
+// ---------- data loading ----------
+let loading=null;
+async function reload(){
+  if(loading)return loading;
+  loading=(async()=>{try{
+    const since=addDays(today(),-200);
+    const [ath,ses,rep,set,lnk]=await Promise.all([
+      fetchAll(()=>sb.from("athletes").select("*").order("name")),
+      fetchAll(()=>sb.from("sessions").select("*").gte("date",since).order("date")),
+      fetchAll(()=>sb.from("reports").select("*").gte("date",since).order("date",{ascending:false})),
+      sb.from("settings").select("*").then(r=>{if(r.error)throw r.error;return r.data}),
+      fetchAll(()=>sb.from("family_links").select("*"))]);
+    S.athletes=ath.map(fromAth);S.sessions=ses.map(fromSes);S.reports=rep.map(fromRep);
+    S.links=lnk.map(l=>({userId:l.user_id,athleteId:l.athlete_id,email:l.email,createdAt:ts(l.created_at)}));
+    const st=Object.fromEntries(set.map(x=>[x.key,x.value]));
+    S.blockStart=st.block?.start||null;applyEst(st.estimate);
+    const first=!S.loaded;S.loaded=true;note("");
+    if(first){if(fam()&&!S.progAth)S.progAth=S.athletes[0]?.id||"";if(S.progAth&&!athById(S.progAth))S.progAth="";
+      if(frame().mode==="athlete")focusWeek();else if(fam()){const bs=S.blockStart||monday(today());const diff=Math.round((parse(monday(today()))-parse(bs))/864e5/7);S.viewOffset=Math.floor(diff/4);S.week=((diff%4)+4)%4}}
+    if(first||S.view==="join"||(fam()&&!S.athletes.length))show(S.view);else refresh();
+  }catch(e){note("Data tidak bisa dimuat: "+esc(e.message||e.code||"error")+". Periksa koneksi lalu muat ulang halaman.",true)}
+  finally{loading=null}})();
+  return loading}
+function applyEst(v){const base=clone(EST_DEFAULT);v=v||{};S.est={...base,...v,cats:{...base.cats}};Object.keys(base.cats).forEach(k=>{if(v.cats&&v.cats[k])S.est.cats[k]={...base.cats[k],...v.cats[k]}})}
+
+async function onSession(session){
+  if(!session){S.role="anon";S.me=null;S.loaded=false;$("#who").innerHTML=`<b>Belum masuk</b>`;show("login");return}
+  if(S.me===session.user.id&&S.role!=="anon")return;
+  S.me=session.user.id;S.email=session.user.email||"";
+  const {data,error}=await sb.from("coaches").select("user_id").eq("user_id",S.me).maybeSingle();
+  if(error){note("Tidak bisa memeriksa akun: "+esc(error.message),true);return}
+  S.role=data?"coach":"family";document.body.classList.toggle("fam",fam());
+  $("#who").innerHTML=`<b>${coach()?"Coach":"Keluarga atlet"}</b><br>${esc(S.email)}`;
+  await reload();
+}
+
+// ---------- boot ----------
+(async()=>{
+  const k=CFG.supabaseKey;const prob=keyProblem(k);
+  if(prob){note(prob,true);$("#who").textContent="";document.querySelector(".tabs").hidden=true;["program","lapor","pantau","atlet","join","login"].forEach(x=>$("#v-"+x).hidden=true);return}
+  if(!window.supabase){note("Library Supabase gagal dimuat. Periksa koneksi internet.",true);return}
+  sb=window.supabase.createClient(CFG.supabaseUrl,k,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  const {data:{session}}=await sb.auth.getSession();
+  await onSession(session);
+  sb.auth.onAuthStateChange((ev,sess)=>{if(ev==="SIGNED_IN"||ev==="SIGNED_OUT")setTimeout(()=>onSession(sess),0)});
+  setInterval(()=>{if(document.visibilityState==="visible"&&S.loaded)reload()},60000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.loaded)reload()});
+})();
+})();
+
+</script>
+</body>
+</html>
