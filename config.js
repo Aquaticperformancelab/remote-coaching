@@ -8,7 +8,7 @@
 //  File ini dibaca publik, dan keamanannya dijaga oleh aturan RLS.
 // =============================================================
 window.DEVILRAYS_CONFIG = {
-  supabaseUrl: "https://izxapsjnqkujeuuvdwul.supabase.co/rest/v1/"
-  supabaseKey: "sb_publishable_c1boKhvViEkYyvM-EV-54w_DbjYGtis"
+  supabaseUrl: "https://izxapsjnqkujeuuvdwul.supabase.co",
+  supabaseKey: "sb_publishable_c1boKhvViEkYyvM-EV-54w_DbjYGtis",
   googleLogin: false   // ubah ke true setelah mengikuti bagian Opsional: login Google
 };
